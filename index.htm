@@ -501,7 +501,8 @@
             items?.forEach(item => {
                 const row = document.createElement('div');
                 const displayDate = new Date(item.data_encontrado).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                row.className = "flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row";
+                const isWithdrawn = !!item.retirado_por;
+                row.className = `flex flex-col md:flex-row md:items-center justify-between p-4 ${isWithdrawn ? 'bg-amber-900/40 border-amber-500/50' : 'bg-gray-800 border-gray-700'} rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row`;
                 row.onclick = () => window.showItemDetails(item.id);
                 row.innerHTML = `
                     <div class="flex items-center space-x-4 min-w-0 flex-1">
