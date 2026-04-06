@@ -274,11 +274,18 @@
 
         window.toggleWithdrawal = () => {
             const section = document.getElementById('withdrawal-section');
-            section.classList.remove('hidden');
-            document.getElementById('withdraw-name').value = currentFolder?.nome || '';
-            const { date, time } = getLocalISODateTime();
-            document.getElementById('withdraw-date').value = date;
-            document.getElementById('withdraw-time').value = time.substring(0, 5);
+            const btn = document.getElementById('btn-withdraw');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                btn.innerHTML = '<i class="fas fa-undo mr-2"></i>Desmarcar como retirado';
+                document.getElementById('withdraw-name').value = currentFolder?.nome || '';
+                const { date, time } = getLocalISODateTime();
+                document.getElementById('withdraw-date').value = date;
+                document.getElementById('withdraw-time').value = time.substring(0, 5);
+            } else {
+                section.classList.add('hidden');
+                btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Marcar como retirado';
+            }
         };
 
         function showMessage(msg, type = 'blue') {
@@ -412,15 +419,18 @@
                 document.getElementById('item-time').value = dt.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
             }
 
-            document.getElementById('btn-withdraw').classList.remove('hidden');
+            const btnWithdraw = document.getElementById('btn-withdraw');
+            btnWithdraw.classList.remove('hidden');
             const withdrawSection = document.getElementById('withdrawal-section');
             if (item.retirado_por) {
+                btnWithdraw.innerHTML = '<i class="fas fa-undo mr-2"></i>Desmarcar como retirado';
                 document.getElementById('withdraw-name').value = item.retirado_por;
                 const rdt = new Date(item.data_retirada);
                 document.getElementById('withdraw-date').value = rdt.toLocaleDateString('sv-SE');
                 document.getElementById('withdraw-time').value = rdt.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
                 withdrawSection.classList.remove('hidden');
             } else {
+                btnWithdraw.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Marcar como retirado';
                 withdrawSection.classList.add('hidden');
             }
 
@@ -565,7 +575,9 @@
             document.getElementById('item-date').value = date;
             document.getElementById('item-time').value = time.substring(0, 5);
 
-            document.getElementById('btn-withdraw').classList.add('hidden');
+            const btnWithdraw = document.getElementById('btn-withdraw');
+            btnWithdraw.classList.add('hidden');
+            btnWithdraw.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Marcar como retirado';
             document.getElementById('withdrawal-section').classList.add('hidden');
 
             capturedFile = null;
@@ -600,6 +612,9 @@
                     if (rDate && rTime) {
                         payload.data_retirada = new Date(`${rDate}T${rTime}:00`).toISOString();
                     }
+                } else {
+                    payload.retirado_por = null;
+                    payload.data_retirada = null;
                 }
                 const { error } = editId ? await supabase.from('achados').update(payload).eq('id', editId) : await supabase.from('achados').insert([payload]);
                 if (error) throw error;
