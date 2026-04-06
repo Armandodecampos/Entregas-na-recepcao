@@ -172,14 +172,37 @@
                     <div><input type="date" id="item-date" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none"></div>
                     <div><input type="time" id="item-time" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none"></div>
                 </div>
-                <div>
-                    <input type="file" id="item-photo" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                <div class="space-y-2">
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <input type="file" id="item-photo" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                        <button type="button" onclick="openCamera()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition flex-shrink-0">
+                            <i class="fas fa-camera mr-2"></i>Tirar Foto
+                        </button>
+                    </div>
+                    <div id="photo-preview-container" class="hidden w-full h-40 bg-gray-800 rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center">
+                        <img id="photo-preview" class="h-full w-auto object-contain">
+                    </div>
                 </div>
                 <div class="flex space-x-3 pt-2">
                     <button type="submit" id="save-item-btn" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold transition">Guardar</button>
                     <button type="button" onclick="closeModal('item-modal')" class="flex-1 bg-gray-600 text-gray-200 py-2 rounded-lg hover:bg-gray-500 transition">Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Camera -->
+    <div id="camera-modal" class="modal">
+        <div class="modal-content max-w-lg p-0 overflow-hidden relative">
+            <video id="camera-video" autoplay playsinline class="w-full h-auto bg-black"></video>
+            <div class="absolute bottom-6 left-0 w-full flex justify-center space-x-4">
+                <button onclick="takePhoto()" class="bg-white text-gray-900 w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-200 transition">
+                    <i class="fas fa-camera text-2xl"></i>
+                </button>
+                <button onclick="stopCamera()" class="bg-red-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -204,6 +227,8 @@
 
         let currentFolder = null;
         let deleteAction = null;
+        let capturedFile = null;
+        let cameraStream = null;
 
         function normalizeString(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -222,6 +247,57 @@
             toast.className = `fixed bottom-5 right-5 z-[2000] block bg-${type === 'green' ? 'emerald' : type === 'red' ? 'red' : 'blue'}-600 text-white px-6 py-3 rounded-lg shadow-2xl break-words max-w-xs`;
             setTimeout(() => { toast.classList.replace('block', 'hidden'); }, 3000);
         }
+
+        window.openCamera = async () => {
+            const modal = document.getElementById('camera-modal');
+            const video = document.getElementById('camera-video');
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = cameraStream;
+                modal.style.display = 'flex';
+            } catch (err) {
+                showMessage("Erro ao aceder à câmara: " + err.message, "red");
+            }
+        };
+
+        window.stopCamera = () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            document.getElementById('camera-modal').style.display = 'none';
+        };
+
+        window.takePhoto = () => {
+            const video = document.getElementById('camera-video');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            canvas.toBlob((blob) => {
+                capturedFile = new File([blob], "camera_photo.jpg", { type: "image/jpeg" });
+                const preview = document.getElementById('photo-preview');
+                const container = document.getElementById('photo-preview-container');
+                preview.src = URL.createObjectURL(blob);
+                container.classList.remove('hidden');
+                stopCamera();
+            }, 'image/jpeg', 0.8);
+        };
+
+        document.getElementById('item-photo').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                capturedFile = null;
+                const preview = document.getElementById('photo-preview');
+                const container = document.getElementById('photo-preview-container');
+                preview.src = URL.createObjectURL(file);
+                container.classList.remove('hidden');
+            }
+        };
 
         function customConfirm(message, onConfirm) {
             const modal = document.getElementById('confirm-modal');
@@ -280,6 +356,9 @@
                 document.getElementById('item-date').value = dt.toLocaleDateString('sv-SE');
                 document.getElementById('item-time').value = dt.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
             }
+            capturedFile = null;
+            document.getElementById('photo-preview-container').classList.add('hidden');
+            document.getElementById('photo-preview').src = '';
             document.getElementById('item-modal').style.display = 'flex';
         };
 
@@ -417,6 +496,9 @@
             const { date, time } = getLocalISODateTime();
             document.getElementById('item-date').value = date;
             document.getElementById('item-time').value = time.substring(0, 5);
+            capturedFile = null;
+            document.getElementById('photo-preview-container').classList.add('hidden');
+            document.getElementById('photo-preview').src = '';
             document.getElementById('item-modal').style.display = 'flex';
         };
 
@@ -427,7 +509,7 @@
             const originalText = btn.innerHTML;
             btn.disabled = true; btn.innerHTML = "A gravar...";
             try {
-                const file = document.getElementById('item-photo').files[0];
+                const file = capturedFile || document.getElementById('item-photo').files[0];
                 const photoUrl = file ? await uploadPhoto(file) : null;
                 const dateVal = document.getElementById('item-date').value;
                 const timeVal = document.getElementById('item-time').value;
