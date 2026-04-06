@@ -113,7 +113,7 @@
         <main id="content-grid" class="flex-grow p-4 lg:px-12 overflow-y-auto custom-scrollbar space-y-3 app-height"></main>
     </div>
 
-    <!-- Modal Detalhes da Encomenda (Visualização Grande) -->
+    <!-- Modal Detalhes da Encomenda -->
     <div id="detail-modal" class="modal">
         <div class="modal-content max-w-2xl">
             <div class="flex justify-between items-center mb-4">
@@ -121,28 +121,26 @@
                 <button onclick="closeModal('detail-modal')" class="text-gray-400 hover:text-white transition text-2xl">&times;</button>
             </div>
             <div class="space-y-6">
-                <div id="detail-photo-container" class="w-full h-80 bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex items-center justify-center">
-                    <!-- Imagem será inserida aqui -->
-                </div>
+                <div id="detail-photo-container" class="w-full h-80 bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex items-center justify-center"></div>
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="bg-gray-700/50 p-4 rounded-lg">
-                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Descrição do Pacote</label>
+                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Descrição</label>
                         <p id="detail-desc" class="text-white text-lg font-medium">-</p>
                     </div>
                     <div class="bg-gray-700/50 p-4 rounded-lg">
-                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Transportadora / Remetente</label>
+                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Status</label>
                         <p id="detail-local" class="text-white text-lg font-medium">-</p>
                     </div>
                     <div class="bg-gray-700/50 p-4 rounded-lg">
-                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Data de Recepção</label>
+                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Data</label>
                         <p id="detail-date" class="text-white text-lg font-medium">-</p>
                     </div>
                     <div class="bg-gray-700/50 p-4 rounded-lg">
-                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Hora do Registro</label>
+                        <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Hora</label>
                         <p id="detail-time" class="text-white text-lg font-medium">-</p>
                     </div>
                 </div>
-                <button onclick="closeModal('detail-modal')" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 rounded-lg transition uppercase tracking-wide">Fechar Visualização</button>
+                <button onclick="closeModal('detail-modal')" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 rounded-lg transition uppercase tracking-wide">Fechar</button>
             </div>
         </div>
     </div>
@@ -160,32 +158,23 @@
         </div>
     </div>
 
-    <!-- Modal Encomenda (Formulário) -->
+    <!-- Modal Encomenda -->
     <div id="item-modal" class="modal">
         <div class="modal-content max-w-lg">
-            <h3 id="item-modal-title" class="text-xl font-bold text-white mb-4">Registar Encomenda</h3>
+            <h3 id="item-modal-title" class="text-xl font-bold text-white mb-4">Registro da Encomenda</h3>
             <input type="hidden" id="edit-item-id">
             <form id="item-form" class="space-y-4">
-                <input type="text" id="item-desc" placeholder="Descrição (Ex: Caixa grande)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="item-local" placeholder="Transportadora / Remetente" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="item-desc" placeholder="Descrição" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="item-local" placeholder="Status" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Data</label>
-                        <input type="date" id="item-date" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Hora</label>
-                        <input type="time" id="item-time" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
-                    </div>
+                    <div><input type="date" id="item-date" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none"></div>
+                    <div><input type="time" id="item-time" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none"></div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1 text-xs">Foto do Pacote (Opcional)</label>
                     <input type="file" id="item-photo" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
                 </div>
                 <div class="flex space-x-3 pt-2">
-                    <button type="submit" id="save-item-btn" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold flex items-center justify-center transition">
-                        <span>Guardar</span>
-                    </button>
+                    <button type="submit" id="save-item-btn" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold transition">Guardar</button>
                     <button type="button" onclick="closeModal('item-modal')" class="flex-1 bg-gray-600 text-gray-200 py-2 rounded-lg hover:bg-gray-500 transition">Cancelar</button>
                 </div>
             </form>
@@ -195,9 +184,7 @@
     <!-- Modal Confirmação -->
     <div id="confirm-modal" class="modal">
         <div class="modal-content text-center">
-            <div class="text-red-500 text-4xl mb-4">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
+            <div class="text-red-500 text-4xl mb-4"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 class="text-xl font-bold text-white mb-2">Confirmar Exclusão</h3>
             <p id="confirm-message" class="text-gray-400 mb-6">Deseja realmente excluir este registo?</p>
             <div class="flex space-x-3">
@@ -215,6 +202,11 @@
 
         let currentFolder = null;
         let deleteAction = null;
+
+        // Função para remover acentos e converter para minúsculas
+        function normalizeString(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
 
         function getLocalISODateTime() {
             const now = new Date();
@@ -243,30 +235,23 @@
         };
 
         document.getElementById('confirm-no').onclick = () => closeModal('confirm-modal');
-
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
-        // Detalhes da Encomenda
         window.showItemDetails = async (id) => {
             const { data: item, error } = await supabase.from('achados').select('*').eq('id', id).single();
             if (error) return showMessage("Erro ao abrir detalhes", "red");
-
             const photoContainer = document.getElementById('detail-photo-container');
             photoContainer.innerHTML = item.anexo_url 
                 ? `<img src="${item.anexo_url}" class="w-full h-full object-contain bg-black">` 
-                : `<div class="text-center text-gray-500"><i class="fas fa-box-open text-6xl mb-2"></i><br>Sem fotografia</div>`;
-
+                : `<div class="text-center text-gray-500"><i class="fas fa-box-open text-6xl mb-2"></i><br>Sem foto</div>`;
             const dateObj = new Date(item.data_encontrado);
-            
             document.getElementById('detail-desc').textContent = item.descricao;
             document.getElementById('detail-local').textContent = item.local_encontrado;
             document.getElementById('detail-date').textContent = dateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' });
             document.getElementById('detail-time').textContent = dateObj.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-
             document.getElementById('detail-modal').style.display = 'flex';
         };
 
-        // CRUD Destinatário
         window.editFolder = (id, nome) => {
             document.getElementById('folder-modal-title').textContent = "Editar Destinatário";
             document.getElementById('edit-folder-id').value = id;
@@ -275,26 +260,20 @@
         };
 
         window.deleteFolder = (id) => {
-            customConfirm("Excluir este destinatário e todas as suas encomendas?", async () => {
+            customConfirm("Excluir este destinatário e todas as encomendas?", async () => {
                 const { error } = await supabase.from('pastas').delete().eq('id', id);
                 if (error) showMessage("Erro: " + error.message, 'red');
-                else {
-                    showMessage("Removido com sucesso!", 'green');
-                    renderFolders();
-                }
+                else { showMessage("Removido!", 'green'); renderFolders(); }
             });
         };
 
-        // CRUD Encomenda
         window.editItem = async (id) => {
             const { data: item, error } = await supabase.from('achados').select('*').eq('id', id).single();
             if (error) return showMessage("Erro ao carregar dados", "red");
-
             document.getElementById('item-modal-title').textContent = "Editar Encomenda";
             document.getElementById('edit-item-id').value = id;
             document.getElementById('item-desc').value = item.descricao;
             document.getElementById('item-local').value = item.local_encontrado;
-            
             if (item.data_encontrado) {
                 const dt = new Date(item.data_encontrado);
                 document.getElementById('item-date').value = dt.toLocaleDateString('sv-SE');
@@ -304,13 +283,10 @@
         };
 
         window.deleteItem = (id) => {
-            customConfirm("Remover este registo de encomenda?", async () => {
+            customConfirm("Remover este registo?", async () => {
                 const { error } = await supabase.from('achados').delete().eq('id', id);
-                if (error) showMessage("Erro ao excluir: " + error.message, 'red');
-                else {
-                    showMessage("Registo eliminado!", 'green');
-                    renderItems(currentFolder.id);
-                }
+                if (error) showMessage("Erro: " + error.message, 'red');
+                else { showMessage("Eliminado!", 'green'); renderItems(currentFolder.id); }
             });
         };
 
@@ -321,7 +297,7 @@
             const btnNewFolder = document.getElementById('btn-new-folder');
             const btnNewItem = document.getElementById('btn-new-item');
             const title = document.getElementById('current-view-title');
-
+            document.getElementById('search-input').value = '';
             content.innerHTML = '';
             if (!folder) {
                 title.textContent = "Destinatários";
@@ -341,26 +317,18 @@
         async function renderFolders() {
             const container = document.getElementById('content-grid');
             const { data: folders } = await supabase.from('pastas').select('*').order('nome');
-            
             container.innerHTML = '';
             folders?.forEach(f => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl cursor-pointer hover:bg-gray-700 transition shadow-sm group w-full max-w-4xl mx-auto item-row";
+                row.className = "flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl cursor-pointer hover:bg-gray-700 transition shadow-sm w-full max-w-4xl mx-auto item-row";
                 row.innerHTML = `
                     <div class="flex items-center space-x-4 flex-grow">
-                        <div class="w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center">
-                            <i class="fas fa-user-circle text-blue-400 text-2xl"></i>
-                        </div>
+                        <div class="w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center"><i class="fas fa-user-circle text-blue-400 text-2xl"></i></div>
                         <span class="text-white font-semibold text-lg">${f.nome}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="event.stopPropagation(); window.editFolder('${f.id}', '${f.nome}')" class="text-gray-400 hover:text-blue-400 p-2 transition">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="event.stopPropagation(); window.deleteFolder('${f.id}')" class="text-gray-400 hover:text-red-500 p-2 transition">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                        <i class="fas fa-chevron-right text-gray-600 ml-2"></i>
+                        <button onclick="event.stopPropagation(); window.editFolder('${f.id}', '${f.nome}')" class="text-gray-400 hover:text-blue-400 p-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="event.stopPropagation(); window.deleteFolder('${f.id}')" class="text-gray-400 hover:text-red-500 p-2"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
                 row.onclick = () => setView(f);
@@ -371,16 +339,12 @@
         async function renderItems(folderId) {
             const container = document.getElementById('content-grid');
             const { data: items } = await supabase.from('achados').select('*').eq('pasta_id', folderId).order('data_encontrado', { ascending: false });
-
-            container.innerHTML = items?.length === 0 ? '<div class="text-center text-gray-500 py-20"><i class="fas fa-box-open text-4xl mb-3"></i><br>Nenhuma encomenda registada.</div>' : '';
+            container.innerHTML = items?.length === 0 ? '<div class="text-center text-gray-500 py-20">Sem registos.</div>' : '';
             items?.forEach(item => {
                 const row = document.createElement('div');
-                const dateObj = new Date(item.data_encontrado);
-                const displayDate = dateObj.toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-
+                const displayDate = new Date(item.data_encontrado).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 row.className = "flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row";
                 row.onclick = () => window.showItemDetails(item.id);
-                
                 row.innerHTML = `
                     <div class="flex items-center space-x-4">
                         <div class="w-16 h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center">
@@ -389,18 +353,14 @@
                         <div>
                             <h4 class="text-white font-bold text-lg">${item.descricao}</h4>
                             <div class="flex flex-wrap gap-x-4 text-sm text-gray-400">
-                                <span class="flex items-center"><i class="fas fa-truck mr-1.5 text-blue-500"></i>${item.local_encontrado}</span>
-                                <span class="flex items-center"><i class="fas fa-clock mr-1.5 text-gray-500"></i>${displayDate}</span>
+                                <span><i class="fas fa-truck mr-1 text-blue-500"></i>${item.local_encontrado}</span>
+                                <span><i class="fas fa-clock mr-1 text-gray-500"></i>${displayDate}</span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2 justify-end" onclick="event.stopPropagation()">
-                        <button onclick="window.editItem('${item.id}')" class="text-gray-400 hover:text-blue-400 p-3 bg-gray-700/50 rounded-lg transition" title="Editar">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                        <button onclick="window.deleteItem('${item.id}')" class="text-gray-400 hover:text-red-500 p-3 bg-gray-700/50 rounded-lg transition" title="Excluir">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                        <button onclick="window.editItem('${item.id}')" class="p-3 bg-gray-700/50 rounded-lg hover:text-blue-400"><i class="fas fa-pencil-alt"></i></button>
+                        <button onclick="window.deleteItem('${item.id}')" class="p-3 bg-gray-700/50 rounded-lg hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
                 container.appendChild(row);
@@ -415,7 +375,6 @@
             return publicUrl;
         }
 
-        // Eventos Auth
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -434,7 +393,6 @@
 
         document.getElementById('btn-logout').onclick = () => supabase.auth.signOut();
         document.getElementById('btn-back').onclick = () => setView();
-        
         document.getElementById('btn-new-folder').onclick = () => {
             document.getElementById('folder-modal-title').textContent = "Novo Destinatário";
             document.getElementById('edit-folder-id').value = "";
@@ -446,20 +404,13 @@
             const nome = document.getElementById('folder-name').value.trim();
             const editId = document.getElementById('edit-folder-id').value;
             if (!nome) return;
-
-            const { error } = editId 
-                ? await supabase.from('pastas').update({ nome }).eq('id', editId)
-                : await supabase.from('pastas').insert([{ nome }]);
-
-            if (!error) { 
-                closeModal('folder-modal'); 
-                showMessage(editId ? "Destinatário atualizado" : "Destinatário adicionado", "green");
-                renderFolders(); 
-            } else showMessage(error.message, "red");
+            const { error } = editId ? await supabase.from('pastas').update({ nome }).eq('id', editId) : await supabase.from('pastas').insert([{ nome }]);
+            if (!error) { closeModal('folder-modal'); showMessage("Sucesso", "green"); renderFolders(); }
+            else showMessage(error.message, "red");
         };
 
         document.getElementById('btn-new-item').onclick = () => {
-            document.getElementById('item-modal-title').textContent = "Registar Encomenda";
+            document.getElementById('item-modal-title').textContent = "Registro da Encomenda";
             document.getElementById('edit-item-id').value = "";
             document.getElementById('item-form').reset();
             const { date, time } = getLocalISODateTime();
@@ -473,45 +424,32 @@
             const btn = document.getElementById('save-item-btn');
             const editId = document.getElementById('edit-item-id').value;
             const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `<span class="loading-spinner"></span> Gravando...`;
-
+            btn.disabled = true; btn.innerHTML = "A gravar...";
             try {
                 const file = document.getElementById('item-photo').files[0];
                 const photoUrl = file ? await uploadPhoto(file) : null;
                 const dateVal = document.getElementById('item-date').value;
                 const timeVal = document.getElementById('item-time').value;
-                const finalDateTime = new Date(`${dateVal}T${timeVal}:00`).toISOString();
-
                 const payload = {
                     descricao: document.getElementById('item-desc').value,
                     local_encontrado: document.getElementById('item-local').value,
-                    data_encontrado: finalDateTime,
+                    data_encontrado: new Date(`${dateVal}T${timeVal}:00`).toISOString(),
                 };
-
                 if (photoUrl) payload.anexo_url = photoUrl;
                 if (!editId) payload.pasta_id = currentFolder.id;
-
-                const { error } = editId
-                    ? await supabase.from('achados').update(payload).eq('id', editId)
-                    : await supabase.from('achados').insert([payload]);
-
+                const { error } = editId ? await supabase.from('achados').update(payload).eq('id', editId) : await supabase.from('achados').insert([payload]);
                 if (error) throw error;
-                closeModal('item-modal');
-                renderItems(currentFolder.id);
-                showMessage("Sucesso!", "green");
-            } catch (err) {
-                showMessage(err.message, 'red');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
+                closeModal('item-modal'); renderItems(currentFolder.id); showMessage("Gravado", "green");
+            } catch (err) { showMessage(err.message, 'red'); }
+            finally { btn.disabled = false; btn.innerHTML = originalText; }
         };
 
+        // PESQUISA INSENSÍVEL A ACENTOS
         document.getElementById('search-input').oninput = (e) => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('#content-grid > div').forEach(c => {
-                c.style.display = c.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
+            const term = normalizeString(e.target.value);
+            document.querySelectorAll('#content-grid > div').forEach(card => {
+                const text = normalizeString(card.textContent);
+                card.style.display = text.includes(term) ? 'flex' : 'none';
             });
         };
 
@@ -520,13 +458,9 @@
             const title = document.getElementById('form-title');
             const toggle = document.getElementById('toggle-auth');
             if (title.textContent === 'Login') {
-                title.textContent = 'Criar Conta';
-                btn.textContent = 'Registar';
-                toggle.textContent = 'Já tem conta? Entrar';
+                title.textContent = 'Criar Conta'; btn.textContent = 'Registar'; toggle.textContent = 'Já tem conta? Entrar';
             } else {
-                title.textContent = 'Login';
-                btn.textContent = 'Entrar';
-                toggle.textContent = 'Não tem conta? Registe-se';
+                title.textContent = 'Login'; btn.textContent = 'Entrar'; toggle.textContent = 'Não tem conta? Registe-se';
             }
         };
     </script>
