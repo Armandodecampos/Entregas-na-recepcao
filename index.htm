@@ -29,6 +29,8 @@
             max-width: 500px;
             border-radius: 1rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -52,7 +54,7 @@
         }
 
         .app-height {
-            height: calc(100vh - 160px);
+            height: calc(100vh - 180px);
         }
 
         .item-row:hover {
@@ -63,7 +65,7 @@
 <body class="bg-gray-900 text-gray-300 min-h-screen">
 
     <div id="access-control-title" class="fixed top-0 left-0 w-full p-6 text-center bg-gray-900 z-50">
-        <h1 class="text-3xl font-bold text-gray-100">Gestão de Encomendas - Recepção</h1>
+        <h1 class="text-3xl font-bold text-gray-100 break-words">Gestão de Encomendas - Recepção</h1>
     </div>
 
     <!-- Notificações -->
@@ -84,29 +86,29 @@
 
     <!-- App UI -->
     <div id="main-app" class="hidden flex flex-col h-screen overflow-hidden">
-        <header class="bg-gray-800 p-4 shadow-md flex justify-between items-center px-6 lg:px-12 z-10 border-b border-gray-700">
-            <div class="flex items-center space-x-4">
-                <button id="btn-back" class="hidden text-white bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition">
-                    <i class="fas fa-arrow-left mr-2"></i>Voltar
+        <header class="bg-gray-800 p-4 shadow-md flex flex-wrap justify-between items-center px-4 lg:px-12 z-10 border-b border-gray-700 gap-y-3">
+            <div class="flex items-center space-x-4 min-w-0 flex-1">
+                <button id="btn-back" class="hidden text-white bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition flex-shrink-0">
+                    <i class="fas fa-arrow-left"></i>
                 </button>
-                <h2 id="current-view-title" class="text-xl font-bold text-white">Destinatários</h2>
+                <h2 id="current-view-title" class="text-xl font-bold text-white truncate break-all">Destinatários</h2>
             </div>
             
-            <div class="flex items-center space-x-3">
-                <button id="btn-new-folder" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition">
-                    <i class="fas fa-user-plus mr-2"></i>Novo Destinatário
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <button id="btn-new-folder" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">
+                    <i class="fas fa-user-plus mr-1 sm:mr-2"></i>Novo Destinatário
                 </button>
-                <button id="btn-new-item" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
-                    <i class="fas fa-box mr-2"></i>Nova Encomenda
+                <button id="btn-new-item" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">
+                    <i class="fas fa-box mr-1 sm:mr-2"></i>Nova Encomenda
                 </button>
-                <button id="btn-logout" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition">Sair</button>
+                <button id="btn-logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">Sair</button>
             </div>
         </header>
 
         <div class="bg-gray-900 p-4 px-6 lg:px-12">
             <div class="relative max-w-2xl mx-auto">
                 <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
-                <input type="text" id="search-input" placeholder="Pesquisar..." class="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
+                <input type="text" id="search-input" placeholder="Pesquisar (ex: Jose para achar José)..." class="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
             </div>
         </div>
 
@@ -117,19 +119,19 @@
     <div id="detail-modal" class="modal">
         <div class="modal-content max-w-2xl">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-white">Detalhes da Encomenda</h3>
-                <button onclick="closeModal('detail-modal')" class="text-gray-400 hover:text-white transition text-2xl">&times;</button>
+                <h3 class="text-xl font-bold text-white">Detalhes</h3>
+                <button onclick="closeModal('detail-modal')" class="text-gray-400 hover:text-white transition text-2xl p-2">&times;</button>
             </div>
             <div class="space-y-6">
-                <div id="detail-photo-container" class="w-full h-80 bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex items-center justify-center"></div>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="bg-gray-700/50 p-4 rounded-lg">
+                <div id="detail-photo-container" class="w-full h-48 sm:h-80 bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex items-center justify-center"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gray-700/50 p-4 rounded-lg min-w-0">
                         <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Descrição</label>
-                        <p id="detail-desc" class="text-white text-lg font-medium">-</p>
+                        <p id="detail-desc" class="text-white text-lg font-medium break-all">-</p>
                     </div>
-                    <div class="bg-gray-700/50 p-4 rounded-lg">
+                    <div class="bg-gray-700/50 p-4 rounded-lg min-w-0">
                         <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Status de acompanhamento</label>
-                        <p id="detail-local" class="text-white text-lg font-medium">-</p>
+                        <p id="detail-local" class="text-white text-lg font-medium break-all">-</p>
                     </div>
                     <div class="bg-gray-700/50 p-4 rounded-lg">
                         <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Data</label>
@@ -150,7 +152,7 @@
         <div class="modal-content">
             <h3 id="folder-modal-title" class="text-xl font-bold text-white mb-4">Novo Destinatário</h3>
             <input type="hidden" id="edit-folder-id">
-            <input type="text" id="folder-name" placeholder="Nome completo / Email" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white mb-4 outline-none focus:ring-2 focus:ring-emerald-500">
+            <input type="text" id="folder-name" placeholder="Nome / Sala / Apartamento" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white mb-4 outline-none focus:ring-2 focus:ring-emerald-500">
             <div class="flex space-x-3">
                 <button id="save-folder-btn" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold hover:bg-emerald-700 transition">Guardar</button>
                 <button onclick="closeModal('folder-modal')" class="flex-1 bg-gray-600 text-gray-200 py-2 rounded-lg hover:bg-gray-500 transition">Cancelar</button>
@@ -161,10 +163,10 @@
     <!-- Modal Encomenda -->
     <div id="item-modal" class="modal">
         <div class="modal-content max-w-lg">
-            <h3 id="item-modal-title" class="text-xl font-bold text-white mb-4">Registro da Encomenda</h3>
+            <h3 id="item-modal-title" class="text-xl font-bold text-white mb-4">Registar Encomenda</h3>
             <input type="hidden" id="edit-item-id">
             <form id="item-form" class="space-y-4">
-                <input type="text" id="item-desc" placeholder="Descrição" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="item-desc" placeholder="Descrição (Objeto / NF / Remetente)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
                 <input type="text" id="item-local" placeholder="Status de acompanhamento" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
                 <div class="grid grid-cols-2 gap-3">
                     <div><input type="date" id="item-date" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none"></div>
@@ -186,7 +188,7 @@
         <div class="modal-content text-center">
             <div class="text-red-500 text-4xl mb-4"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 class="text-xl font-bold text-white mb-2">Confirmar Exclusão</h3>
-            <p id="confirm-message" class="text-gray-400 mb-6">Deseja realmente excluir este registo?</p>
+            <p id="confirm-message" class="text-gray-400 mb-6 break-all">Deseja realmente excluir este registo?</p>
             <div class="flex space-x-3">
                 <button id="confirm-yes" class="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold hover:bg-red-700 transition">Excluir</button>
                 <button id="confirm-no" class="flex-1 bg-gray-600 text-gray-200 py-2 rounded-lg hover:bg-gray-500 transition">Cancelar</button>
@@ -203,7 +205,6 @@
         let currentFolder = null;
         let deleteAction = null;
 
-        // Função para remover acentos e converter para minúsculas
         function normalizeString(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
@@ -218,7 +219,7 @@
         function showMessage(msg, type = 'blue') {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
-            toast.className = `fixed bottom-5 right-5 z-[2000] block bg-${type === 'green' ? 'emerald' : type === 'red' ? 'red' : 'blue'}-600 text-white px-6 py-3 rounded-lg shadow-2xl`;
+            toast.className = `fixed bottom-5 right-5 z-[2000] block bg-${type === 'green' ? 'emerald' : type === 'red' ? 'red' : 'blue'}-600 text-white px-6 py-3 rounded-lg shadow-2xl break-words max-w-xs`;
             setTimeout(() => { toast.classList.replace('block', 'hidden'); }, 3000);
         }
 
@@ -260,7 +261,7 @@
         };
 
         window.deleteFolder = (id) => {
-            customConfirm("Excluir este destinatário e todas as encomendas?", async () => {
+            customConfirm("Excluir este destinatário e todas as encomendas vinculadas?", async () => {
                 const { error } = await supabase.from('pastas').delete().eq('id', id);
                 if (error) showMessage("Erro: " + error.message, 'red');
                 else { showMessage("Removido!", 'green'); renderFolders(); }
@@ -283,7 +284,7 @@
         };
 
         window.deleteItem = (id) => {
-            customConfirm("Remover este registo?", async () => {
+            customConfirm("Remover este registo permanentemente?", async () => {
                 const { error } = await supabase.from('achados').delete().eq('id', id);
                 if (error) showMessage("Erro: " + error.message, 'red');
                 else { showMessage("Eliminado!", 'green'); renderItems(currentFolder.id); }
@@ -306,7 +307,7 @@
                 btnNewItem.classList.add('hidden');
                 renderFolders();
             } else {
-                title.textContent = `Destinatário: ${folder.nome}`;
+                title.textContent = folder.nome;
                 btnBack.classList.remove('hidden');
                 btnNewFolder.classList.add('hidden');
                 btnNewItem.classList.remove('hidden');
@@ -322,11 +323,11 @@
                 const row = document.createElement('div');
                 row.className = "flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl cursor-pointer hover:bg-gray-700 transition shadow-sm w-full max-w-4xl mx-auto item-row";
                 row.innerHTML = `
-                    <div class="flex items-center space-x-4 flex-grow">
-                        <div class="w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center"><i class="fas fa-user-circle text-blue-400 text-2xl"></i></div>
-                        <span class="text-white font-semibold text-lg">${f.nome}</span>
+                    <div class="flex items-center space-x-4 flex-grow min-w-0 pr-2">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-900/30 flex items-center justify-center flex-shrink-0"><i class="fas fa-user-circle text-blue-400 text-xl sm:text-2xl"></i></div>
+                        <span class="text-white font-semibold text-base sm:text-lg break-all line-clamp-2">${f.nome}</span>
                     </div>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-1 flex-shrink-0">
                         <button onclick="event.stopPropagation(); window.editFolder('${f.id}', '${f.nome}')" class="text-gray-400 hover:text-blue-400 p-2"><i class="fas fa-edit"></i></button>
                         <button onclick="event.stopPropagation(); window.deleteFolder('${f.id}')" class="text-gray-400 hover:text-red-500 p-2"><i class="fas fa-trash-alt"></i></button>
                     </div>
@@ -339,28 +340,28 @@
         async function renderItems(folderId) {
             const container = document.getElementById('content-grid');
             const { data: items } = await supabase.from('achados').select('*').eq('pasta_id', folderId).order('data_encontrado', { ascending: false });
-            container.innerHTML = items?.length === 0 ? '<div class="text-center text-gray-500 py-20">Sem registos.</div>' : '';
+            container.innerHTML = items?.length === 0 ? '<div class="text-center text-gray-500 py-20">Sem registos para este destinatário.</div>' : '';
             items?.forEach(item => {
                 const row = document.createElement('div');
                 const displayDate = new Date(item.data_encontrado).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 row.className = "flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row";
                 row.onclick = () => window.showItemDetails(item.id);
                 row.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center">
-                            ${item.anexo_url ? `<img src="${item.anexo_url}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-500 text-2xl"></i>`}
+                    <div class="flex items-center space-x-4 min-w-0 flex-1">
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center">
+                            ${item.anexo_url ? `<img src="${item.anexo_url}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-500 text-xl"></i>`}
                         </div>
-                        <div>
-                            <h4 class="text-white font-bold text-lg">${item.descricao}</h4>
-                            <div class="flex flex-wrap gap-x-4 text-sm text-gray-400">
-                                <span><i class="fas fa-truck mr-1 text-blue-500"></i>${item.local_encontrado}</span>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-white font-bold text-base sm:text-lg break-all">${item.descricao}</h4>
+                            <div class="flex flex-wrap gap-x-4 text-xs sm:text-sm text-gray-400">
+                                <span class="break-all"><i class="fas fa-truck mr-1 text-blue-500"></i>${item.local_encontrado}</span>
                                 <span><i class="fas fa-clock mr-1 text-gray-500"></i>${displayDate}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2 justify-end" onclick="event.stopPropagation()">
-                        <button onclick="window.editItem('${item.id}')" class="p-3 bg-gray-700/50 rounded-lg hover:text-blue-400"><i class="fas fa-pencil-alt"></i></button>
-                        <button onclick="window.deleteItem('${item.id}')" class="p-3 bg-gray-700/50 rounded-lg hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                    <div class="flex items-center space-x-2 justify-end flex-shrink-0" onclick="event.stopPropagation()">
+                        <button onclick="window.editItem('${item.id}')" class="p-2 sm:p-3 bg-gray-700/50 rounded-lg hover:text-blue-400"><i class="fas fa-pencil-alt"></i></button>
+                        <button onclick="window.deleteItem('${item.id}')" class="p-2 sm:p-3 bg-gray-700/50 rounded-lg hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
                 container.appendChild(row);
@@ -410,7 +411,7 @@
         };
 
         document.getElementById('btn-new-item').onclick = () => {
-            document.getElementById('item-modal-title').textContent = "Registro da Encomenda";
+            document.getElementById('item-modal-title').textContent = "Registar Encomenda";
             document.getElementById('edit-item-id').value = "";
             document.getElementById('item-form').reset();
             const { date, time } = getLocalISODateTime();
@@ -444,7 +445,6 @@
             finally { btn.disabled = false; btn.innerHTML = originalText; }
         };
 
-        // PESQUISA INSENSÍVEL A ACENTOS
         document.getElementById('search-input').oninput = (e) => {
             const term = normalizeString(e.target.value);
             document.querySelectorAll('#content-grid > div').forEach(card => {
