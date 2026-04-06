@@ -444,7 +444,10 @@
             customConfirm("Remover este registo permanentemente?", async () => {
                 const { error } = await supabase.from('achados').delete().eq('id', id);
                 if (error) showMessage("Erro: " + error.message, 'red');
-                else { showMessage("Eliminado!", 'green'); renderItems(currentFolder.id); }
+                else {
+                    showMessage("Eliminado!", 'green');
+                    if (currentFolder) renderItems(currentFolder.id);
+                }
             });
         };
 
@@ -547,7 +550,7 @@
             document.getElementById('auth-container').style.display = session ? 'none' : 'flex';
             document.getElementById('access-control-title').style.display = session ? 'none' : 'block';
             document.getElementById('main-app').classList.toggle('hidden', !session);
-            if (session) setView();
+            if (session && (evt === 'SIGNED_IN' || evt === 'INITIAL_SESSION')) setView();
         });
 
         document.getElementById('btn-logout').onclick = () => supabase.auth.signOut();
@@ -604,7 +607,10 @@
                     data_encontrado: new Date(`${dateVal}T${timeVal}:00`).toISOString(),
                 };
                 if (photoUrl) payload.anexo_url = photoUrl;
-                if (!editId) payload.pasta_id = currentFolder.id;
+                if (!editId) {
+                    if (!currentFolder) throw new Error("Sessão expirada ou destinatário não selecionado");
+                    payload.pasta_id = currentFolder.id;
+                }
 
                 if (!document.getElementById('withdrawal-section').classList.contains('hidden')) {
                     payload.retirado_por = document.getElementById('withdraw-name').value;
@@ -619,7 +625,9 @@
                 }
                 const { error } = editId ? await supabase.from('achados').update(payload).eq('id', editId) : await supabase.from('achados').insert([payload]);
                 if (error) throw error;
-                closeModal('item-modal'); renderItems(currentFolder.id); showMessage("Gravado", "green");
+                closeModal('item-modal');
+                if (currentFolder) renderItems(currentFolder.id);
+                showMessage("Gravado", "green");
             } catch (err) { showMessage(err.message, 'red'); }
             finally { btn.disabled = false; btn.innerHTML = originalText; }
         };
