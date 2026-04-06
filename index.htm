@@ -193,8 +193,8 @@
 
     <!-- Modal Camera -->
     <div id="camera-modal" class="modal">
-        <div class="modal-content max-w-lg p-0 overflow-hidden relative">
-            <video id="camera-video" autoplay playsinline class="w-full h-auto bg-black"></video>
+        <div class="modal-content max-w-[450px] p-0 overflow-hidden relative">
+            <video id="camera-video" autoplay playsinline class="w-full aspect-square object-cover bg-black"></video>
             <div class="absolute bottom-6 left-0 w-full flex justify-center space-x-4">
                 <button onclick="takePhoto()" class="bg-white text-gray-900 w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-200 transition">
                     <i class="fas fa-camera text-2xl"></i>
@@ -273,10 +273,14 @@
         window.takePhoto = () => {
             const video = document.getElementById('camera-video');
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            const size = Math.min(video.videoWidth, video.videoHeight);
+            const sx = (video.videoWidth - size) / 2;
+            const sy = (video.videoHeight - size) / 2;
+
+            canvas.width = 300;
+            canvas.height = 300;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
+            ctx.drawImage(video, sx, sy, size, size, 0, 0, 300, 300);
 
             canvas.toBlob((blob) => {
                 capturedFile = new File([blob], "camera_photo.jpg", { type: "image/jpeg" });
