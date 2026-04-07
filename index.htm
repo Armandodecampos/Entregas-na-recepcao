@@ -477,11 +477,23 @@
 
         async function renderFolders() {
             const container = document.getElementById('content-grid');
-            const { data: folders } = await supabase.from('pastas').select('*').order('nome');
+            const { data: folders } = await supabase.from('pastas').select('*');
+            const { data: activeItems } = await supabase.from('achados').select('pasta_id').is('retirado_por', null);
+            const activeFolderIds = new Set(activeItems?.map(item => item.pasta_id));
+
+            const sortedFolders = folders?.sort((a, b) => {
+                const aActive = activeFolderIds.has(a.id);
+                const bActive = activeFolderIds.has(b.id);
+                if (aActive && !bActive) return -1;
+                if (!aActive && bActive) return 1;
+                return a.nome.localeCompare(b.nome);
+            });
+
             container.innerHTML = '';
-            folders?.forEach(f => {
+            sortedFolders?.forEach(f => {
+                const isActive = activeFolderIds.has(f.id);
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl cursor-pointer hover:bg-gray-700 transition shadow-sm w-full max-w-4xl mx-auto item-row";
+                row.className = `flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-xl cursor-pointer hover:bg-gray-700 transition shadow-sm w-full max-w-4xl mx-auto item-row ${isActive ? '' : 'opacity-50'}`;
                 row.innerHTML = `
                     <div class="flex items-center space-x-4 flex-grow min-w-0 pr-2">
                         <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-900/30 flex items-center justify-center flex-shrink-0"><i class="fas fa-user-circle text-blue-400 text-xl sm:text-2xl"></i></div>
