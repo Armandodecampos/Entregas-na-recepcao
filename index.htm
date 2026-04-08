@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; overflow: hidden; padding-bottom: env(safe-area-inset-bottom); }
         .modal {
             display: none;
             position: fixed;
@@ -29,7 +29,7 @@
             max-width: 500px;
             border-radius: 1rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            max-height: 90vh;
+            max-height: 90dvh;
             overflow-y: auto;
         }
         /* Custom Scrollbar */
@@ -54,7 +54,7 @@
         }
 
         .app-height {
-            height: calc(100vh - 180px);
+            height: calc(100dvh - 180px);
         }
 
         .item-row:hover {
@@ -62,7 +62,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-300 min-h-screen">
+<body class="bg-gray-900 text-gray-300 min-h-[100dvh]">
 
     <div id="access-control-title" class="fixed top-0 left-0 w-full p-6 text-center bg-gray-900 z-50">
         <h1 class="text-3xl font-bold text-gray-100 break-words">Gestão de Encomendas - Recepção</h1>
@@ -72,7 +72,7 @@
     <div id="toast" class="fixed bottom-5 right-5 z-[2000] hidden text-white px-6 py-3 rounded-lg shadow-2xl transition-all"></div>
 
     <!-- Auth UI -->
-    <div id="auth-container" class="flex items-center justify-center min-h-screen p-4">
+    <div id="auth-container" class="flex items-center justify-center min-h-[100dvh] p-4">
         <div class="w-full max-w-sm bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
             <h2 class="text-2xl font-bold text-center text-white mb-6" id="form-title">Login</h2>
             <form id="auth-form" class="space-y-4">
@@ -85,7 +85,7 @@
     </div>
 
     <!-- App UI -->
-    <div id="main-app" class="hidden flex flex-col h-screen overflow-hidden">
+    <div id="main-app" class="hidden flex flex-col h-[100dvh] overflow-hidden">
         <header class="bg-gray-800 p-4 shadow-md flex flex-wrap justify-between items-center px-4 lg:px-12 z-10 border-b border-gray-700 gap-y-3">
             <div class="flex items-center space-x-4 min-w-0 flex-1">
                 <button id="btn-back" class="hidden text-white bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition flex-shrink-0">
