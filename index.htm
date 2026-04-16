@@ -61,17 +61,10 @@
             transform: translateY(-1px);
         }
 
-        @keyframes infinite-scroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
         .carousel-track {
             display: flex;
             width: max-content;
-            animation: infinite-scroll 10s linear infinite;
-        }
-        .carousel-track:hover {
-            animation-play-state: paused;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
@@ -243,10 +236,10 @@
 
 
     <!-- Modal Foto Expandida -->
-    <div id="photo-modal" class="modal" onclick="closeModal('photo-modal')">
-        <div class="modal-content max-w-4xl p-0 bg-transparent border-0 shadow-none flex items-center justify-center relative">
-            <button onclick="event.stopPropagation(); closeModal('photo-modal')" class="absolute -top-10 right-0 text-white text-4xl hover:text-gray-300 transition">&times;</button>
-            <img id="expanded-photo" src="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+    <div id="photo-modal" class="modal !z-[2000]" onclick="closeModal('photo-modal')">
+        <div class="modal-content w-full h-full max-w-none p-0 bg-transparent border-0 shadow-none flex items-center justify-center relative rounded-none">
+            <button onclick="event.stopPropagation(); closeModal('photo-modal')" class="absolute top-4 right-4 text-white text-5xl hover:text-gray-300 transition z-50">&times;</button>
+            <img id="expanded-photo" src="" class="max-w-full max-h-full object-contain shadow-2xl">
         </div>
     </div>
 
@@ -432,7 +425,7 @@
 
             if (photos.length > 0) {
                 photoContainer.innerHTML = photos.map(url =>
-                    `<img src="${url}" onclick="expandPhoto('${url}')" class="h-full w-auto object-contain bg-black flex-shrink-0 rounded-lg border border-gray-700 cursor-zoom-in hover:opacity-90 transition">`
+                    `<img src="${url}" onclick="expandPhoto('${url}')" class="h-full w-auto object-contain bg-black flex-shrink-0 rounded-lg border border-gray-700 cursor-pointer hover:opacity-90 active:opacity-70 transition touch-manipulation">`
                 ).join('');
             } else {
                 photoContainer.innerHTML = `<div class="w-full text-center text-gray-500"><i class="fas fa-box-open text-6xl mb-2"></i><br>Sem foto</div>`;
@@ -580,10 +573,10 @@
                 if (photos.length === 1) {
                     photoContent = `<img src="${photos[0]}" class="w-full h-full object-cover">`;
                 } else if (photos.length > 1) {
-                    // Duplicate photos for infinite loop effect
-                    const extendedPhotos = [...photos, ...photos];
+                    // Add first photo clone at the end for seamless loop
+                    const extendedPhotos = [...photos, photos[0]];
                     photoContent = `
-                        <div class="carousel-track h-full">
+                        <div class="carousel-track h-full" data-index="0" data-total="${photos.length}">
                             ${extendedPhotos.map(url => `<img src="${url}" class="h-full w-14 sm:w-16 object-cover flex-shrink-0 border-r border-gray-900/20">`).join('')}
                         </div>
                     `;
@@ -753,6 +746,33 @@
                 title.textContent = 'Login'; btn.textContent = 'Entrar'; toggle.textContent = 'Não tem conta? Registe-se';
             }
         };
+
+        function advanceCarousels() {
+            document.querySelectorAll('.carousel-track').forEach(track => {
+                const firstChild = track.firstElementChild;
+                if (!firstChild) return;
+                const photoWidth = firstChild.offsetWidth;
+                if (photoWidth === 0) return;
+
+                let index = parseInt(track.dataset.index);
+                const total = parseInt(track.dataset.total);
+
+                index++;
+                track.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                track.style.transform = `translateX(-${index * photoWidth}px)`;
+                track.dataset.index = index;
+
+                if (index === total) {
+                    setTimeout(() => {
+                        track.style.transition = 'none';
+                        track.style.transform = 'translateX(0)';
+                        track.dataset.index = 0;
+                    }, 600);
+                }
+            });
+        }
+
+        setInterval(advanceCarousels, 5000);
     </script>
 </body>
 </html>
