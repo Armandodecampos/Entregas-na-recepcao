@@ -88,17 +88,11 @@
     <div id="main-app" class="hidden flex flex-col h-[100dvh] overflow-hidden">
         <header class="bg-gray-800 p-4 shadow-md flex flex-wrap justify-between items-center px-4 lg:px-12 z-10 border-b border-gray-700 gap-y-3">
             <div class="flex items-center space-x-4 min-w-0 flex-1">
-                <button id="btn-back" class="hidden text-white bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition flex-shrink-0">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h2 id="current-view-title" class="text-xl font-bold text-white truncate break-all">Destinatários</h2>
+                <h2 id="current-view-title" class="text-xl font-bold text-white truncate break-all">Encomendas</h2>
             </div>
             
             <div class="flex items-center space-x-2 flex-shrink-0">
-                <button id="btn-new-folder" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">
-                    <i class="fas fa-user-plus mr-1 sm:mr-2"></i>Novo Destinatário
-                </button>
-                <button id="btn-new-item" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">
+                <button id="btn-new-item" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">
                     <i class="fas fa-box mr-1 sm:mr-2"></i>Nova Encomenda
                 </button>
                 <button id="btn-logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base">Sair</button>
@@ -114,9 +108,6 @@
                         <i class="fas fa-times-circle"></i>
                     </button>
                 </div>
-                <button id="btn-open-filter" class="bg-gray-800 border border-gray-700 text-gray-400 hover:text-white px-4 py-3 rounded-xl transition flex-shrink-0">
-                    <i class="fas fa-filter"></i>
-                </button>
             </div>
         </div>
 
@@ -167,18 +158,6 @@
         </div>
     </div>
 
-    <!-- Modal Destinatário -->
-    <div id="folder-modal" class="modal">
-        <div class="modal-content">
-            <h3 id="folder-modal-title" class="text-xl font-bold text-white mb-4">Novo Destinatário</h3>
-            <input type="hidden" id="edit-folder-id">
-            <input type="text" id="folder-name" placeholder="Nome / Email" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white mb-4 outline-none focus:ring-2 focus:ring-emerald-500">
-            <div class="flex space-x-3">
-                <button id="save-folder-btn" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold hover:bg-emerald-700 transition">Guardar</button>
-                <button onclick="closeModal('folder-modal')" class="flex-1 bg-gray-600 text-gray-200 py-2 rounded-lg hover:bg-gray-500 transition">Cancelar</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Encomenda -->
     <div id="item-modal" class="modal">
@@ -189,6 +168,10 @@
             </button>
             <input type="hidden" id="edit-item-id">
             <form id="item-form" class="space-y-4">
+                <div class="relative">
+                    <input type="text" id="item-recipient" placeholder="Destinatário (Nome)" required autocomplete="off" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="recipient-suggestions" class="hidden absolute left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto custom-scrollbar"></div>
+                </div>
                 <input type="text" id="item-desc" placeholder="Descrição (Objeto / NF / Remetente)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
                 <input type="text" id="item-local" placeholder="Status de acompanhamento" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500">
                 <div class="grid grid-cols-2 gap-3">
@@ -245,21 +228,6 @@
         </div>
     </div>
 
-    <!-- Modal Filtro -->
-    <div id="filter-modal" class="modal">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold text-white mb-6 text-center">Organizar por</h3>
-            <div class="flex flex-col space-y-3">
-                <button id="btn-view-folders" class="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-3">
-                    <i class="fas fa-folder"></i> Pastas de Destinatários
-                </button>
-                <button id="btn-view-all" class="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-3">
-                    <i class="fas fa-boxes"></i> Todas as Encomendas (por data)
-                </button>
-                <button onclick="closeModal('filter-modal')" class="w-full bg-gray-600 text-gray-200 py-3 rounded-lg hover:bg-gray-500 transition mt-4">Cancelar</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Confirmação -->
     <div id="confirm-modal" class="modal">
@@ -280,9 +248,9 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpYm55cXFzd3RrY3R2bWNrc3prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0Njk3OTksImV4cCI6MjA5MTA0NTc5OX0.o84IjeaNLKfEWMFaoJ8dI0mChExh-0Z_UIBLIRThBwk';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        let currentFolder = null;
-        let viewMode = 'folders';
+        let viewMode = 'all-items';
         let deleteAction = null;
+        let allFolders = [];
         let currentPhotos = []; // Array de { file: File, url: string, preview: string }
         let cameraStream = null;
 
@@ -313,7 +281,7 @@
             if (section.classList.contains('hidden')) {
                 section.classList.remove('hidden');
                 btn.innerHTML = '<i class="fas fa-undo mr-2"></i>Desmarcar como retirado';
-                document.getElementById('withdraw-name').value = currentFolder?.nome || '';
+                document.getElementById('withdraw-name').value = document.getElementById('item-recipient').value;
                 const { date, time } = getLocalISODateTime();
                 document.getElementById('withdraw-date').value = date;
                 document.getElementById('withdraw-time').value = time.substring(0, 5);
@@ -463,26 +431,16 @@
             document.getElementById('detail-modal').style.display = 'flex';
         };
 
-        window.editFolder = (id, nome) => {
-            document.getElementById('folder-modal-title').textContent = "Editar Destinatário";
-            document.getElementById('edit-folder-id').value = id;
-            document.getElementById('folder-name').value = nome;
-            document.getElementById('folder-modal').style.display = 'flex';
-        };
-
-        window.deleteFolder = (id) => {
-            customConfirm("Excluir este destinatário e todas as encomendas vinculadas?", async () => {
-                const { error } = await supabase.from('pastas').delete().eq('id', id);
-                if (error) showMessage("Erro: " + error.message, 'red');
-                else { showMessage("Removido!", 'green'); renderFolders(); }
-            });
-        };
 
         window.editItem = async (id) => {
             const { data: item, error } = await supabase.from('achados').select('*').eq('id', id).single();
             if (error) return showMessage("Erro ao carregar dados", "red");
             document.getElementById('item-modal-title').textContent = "Editar Encomenda";
             document.getElementById('edit-item-id').value = id;
+
+            const folder = allFolders.find(f => f.id === item.pasta_id);
+            document.getElementById('item-recipient').value = folder ? folder.nome : '';
+
             document.getElementById('item-desc').value = item.descricao;
             document.getElementById('item-local').value = item.local_encontrado;
             if (item.data_encontrado) {
@@ -503,6 +461,7 @@
                 withdrawSection.classList.remove('hidden');
             } else {
                 btnWithdraw.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Marcar como retirado';
+                document.getElementById('withdraw-name').value = '';
                 withdrawSection.classList.add('hidden');
             }
 
@@ -517,98 +476,64 @@
                 if (error) showMessage("Erro: " + error.message, 'red');
                 else {
                     showMessage("Eliminado!", 'green');
-                    if (currentFolder) renderItems(currentFolder.id);
-                    else if (viewMode === 'all-items') renderAllItems();
+                    renderAllItems();
                 }
             });
         };
 
-        function setView(folder = null) {
-            currentFolder = folder;
+        async function fetchFolders() {
+            const { data, error } = await supabase.from('pastas').select('*');
+            if (!error) allFolders = data || [];
+        }
+
+        window.selectRecipient = (nome) => {
+            document.getElementById('item-recipient').value = nome;
+            document.getElementById('recipient-suggestions').classList.add('hidden');
+        };
+
+        function updateRecipientSuggestions() {
+            const input = document.getElementById('item-recipient');
+            const container = document.getElementById('recipient-suggestions');
+            const term = normalizeString(input.value);
+
+            if (!term) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            const matches = allFolders.filter(f => normalizeString(f.nome).includes(term))
+                .sort((a, b) => a.nome.localeCompare(b.nome))
+                .slice(0, 5);
+
+            if (matches.length > 0) {
+                container.innerHTML = matches.map(f => `
+                    <div onclick="selectRecipient('${f.nome}')" class="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white border-b border-gray-700 last:border-0 transition">
+                        ${f.nome}
+                    </div>
+                `).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#item-recipient') && !e.target.closest('#recipient-suggestions')) {
+                document.getElementById('recipient-suggestions').classList.add('hidden');
+            }
+        });
+
+        function setView() {
             const content = document.getElementById('content-grid');
-            const btnBack = document.getElementById('btn-back');
-            const btnNewFolder = document.getElementById('btn-new-folder');
-            const btnNewItem = document.getElementById('btn-new-item');
             const title = document.getElementById('current-view-title');
             document.getElementById('search-input').value = '';
             document.getElementById('clear-search').classList.add('hidden');
             content.innerHTML = '';
-
-            if (folder) {
-                title.textContent = folder.nome;
-                btnBack.classList.remove('hidden');
-                btnNewFolder.classList.add('hidden');
-                btnNewItem.classList.remove('hidden');
-                renderItems(folder.id);
-            } else {
-                btnBack.classList.add('hidden');
-                btnNewItem.classList.add('hidden');
-
-                if (viewMode === 'all-items') {
-                    title.textContent = "Todas as Encomendas";
-                    btnNewFolder.classList.add('hidden');
-                    renderAllItems();
-                } else {
-                    title.textContent = "Destinatários";
-                    btnNewFolder.classList.remove('hidden');
-                    renderFolders();
-                }
-            }
+            title.textContent = "Encomendas";
+            renderAllItems();
+            fetchFolders();
         }
 
-        async function renderFolders() {
-            const container = document.getElementById('content-grid');
-            const { data: folders } = await supabase.from('pastas').select('*');
-            const { data: allItems } = await supabase.from('achados').select('pasta_id, retirado_por');
-
-            const folderStats = {};
-            folders?.forEach(f => folderStats[f.id] = { hasItems: false, allWithdrawn: true });
-            allItems?.forEach(item => {
-                if (folderStats[item.pasta_id]) {
-                    folderStats[item.pasta_id].hasItems = true;
-                    if (!item.retirado_por) folderStats[item.pasta_id].allWithdrawn = false;
-                }
-            });
-
-            const getPriority = (fId) => {
-                const stats = folderStats[fId];
-                if (!stats || !stats.hasItems) return 3; // Empty
-                if (stats.allWithdrawn) return 2; // All Delivered
-                return 1; // Active
-            };
-
-            const sortedFolders = folders?.sort((a, b) => {
-                const pA = getPriority(a.id);
-                const pB = getPriority(b.id);
-                if (pA !== pB) return pA - pB;
-                return a.nome.localeCompare(b.nome);
-            });
-
-            container.innerHTML = '';
-            sortedFolders?.forEach(f => {
-                const priority = getPriority(f.id);
-                const row = document.createElement('div');
-                let bgClass = "bg-gray-800 border-gray-700";
-                let opacityClass = "";
-
-                if (priority === 2) bgClass = "bg-amber-900/40 border-amber-500/50";
-                if (priority === 3) opacityClass = "opacity-50";
-
-                row.className = `flex items-center justify-between p-4 ${bgClass} ${opacityClass} rounded-xl cursor-pointer hover:bg-gray-700 transition shadow-sm w-full max-w-4xl mx-auto item-row`;
-                row.innerHTML = `
-                    <div class="flex items-center space-x-4 flex-grow min-w-0 pr-2">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-900/30 flex items-center justify-center flex-shrink-0"><i class="fas fa-user-circle text-blue-400 text-xl sm:text-2xl"></i></div>
-                        <span class="text-white font-semibold text-base sm:text-lg break-all line-clamp-2">${f.nome}</span>
-                    </div>
-                    <div class="flex items-center space-x-1 flex-shrink-0">
-                        <button onclick="event.stopPropagation(); window.editFolder('${f.id}', '${f.nome}')" class="text-gray-400 hover:text-blue-400 p-2"><i class="fas fa-edit"></i></button>
-                        <button onclick="event.stopPropagation(); window.deleteFolder('${f.id}')" class="text-gray-400 hover:text-red-500 p-2"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
-                row.onclick = () => setView(f);
-                container.appendChild(row);
-            });
-        }
 
         async function renderAllItems() {
             const container = document.getElementById('content-grid');
@@ -651,40 +576,6 @@
             });
         }
 
-        async function renderItems(folderId) {
-            const container = document.getElementById('content-grid');
-            const { data: items } = await supabase.from('achados').select('*').eq('pasta_id', folderId).order('data_encontrado', { ascending: false });
-            container.innerHTML = items?.length === 0 ? '<div class="text-center text-gray-500 py-20">Sem registos para este destinatário.</div>' : '';
-            items?.forEach(item => {
-                const row = document.createElement('div');
-                const displayDate = new Date(item.data_encontrado).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                const isWithdrawn = !!item.retirado_por;
-                const photos = parseAnexoUrl(item.anexo_url);
-                const thumb = photos.length > 0 ? photos[0] : null;
-
-                row.className = `flex flex-col md:flex-row md:items-center justify-between p-4 ${isWithdrawn ? 'bg-amber-900/40 border-amber-500/50' : 'bg-gray-800 border-gray-700'} rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row`;
-                row.onclick = () => window.showItemDetails(item.id);
-                row.innerHTML = `
-                    <div class="flex items-center space-x-4 min-w-0 flex-1">
-                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center">
-                            ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-500 text-xl"></i>`}
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <h4 class="text-white font-bold text-base sm:text-lg break-all">${item.descricao}</h4>
-                            <div class="flex flex-wrap gap-x-4 text-xs sm:text-sm text-gray-400">
-                                <span class="break-all"><i class="fas fa-truck mr-1 text-blue-500"></i>${item.local_encontrado}</span>
-                                <span><i class="fas fa-clock mr-1 text-gray-500"></i>${displayDate}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2 justify-end flex-shrink-0" onclick="event.stopPropagation()">
-                        <button onclick="window.editItem('${item.id}')" class="p-2 sm:p-3 bg-gray-700/50 rounded-lg hover:text-blue-400"><i class="fas fa-pencil-alt"></i></button>
-                        <button onclick="window.deleteItem('${item.id}')" class="p-2 sm:p-3 bg-gray-700/50 rounded-lg hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
 
         async function uploadPhoto(file) {
             const fileName = `${Date.now()}_${file.name.replace(/[^a-z0-9.]/gi, '_')}`;
@@ -711,25 +602,6 @@
         });
 
         document.getElementById('btn-logout').onclick = () => supabase.auth.signOut();
-        document.getElementById('btn-open-filter').onclick = () => document.getElementById('filter-modal').style.display = 'flex';
-        document.getElementById('btn-view-folders').onclick = () => { viewMode = 'folders'; setView(); closeModal('filter-modal'); };
-        document.getElementById('btn-view-all').onclick = () => { viewMode = 'all-items'; setView(); closeModal('filter-modal'); };
-        document.getElementById('btn-back').onclick = () => setView();
-        document.getElementById('btn-new-folder').onclick = () => {
-            document.getElementById('folder-modal-title').textContent = "Novo Destinatário";
-            document.getElementById('edit-folder-id').value = "";
-            document.getElementById('folder-name').value = '';
-            document.getElementById('folder-modal').style.display = 'flex';
-        };
-
-        document.getElementById('save-folder-btn').onclick = async () => {
-            const nome = document.getElementById('folder-name').value.trim();
-            const editId = document.getElementById('edit-folder-id').value;
-            if (!nome) return;
-            const { error } = editId ? await supabase.from('pastas').update({ nome }).eq('id', editId) : await supabase.from('pastas').insert([{ nome }]);
-            if (!error) { closeModal('folder-modal'); showMessage("Sucesso", "green"); renderFolders(); }
-            else showMessage(error.message, "red");
-        };
 
         document.getElementById('btn-new-item').onclick = () => {
             document.getElementById('item-modal-title').textContent = "Registar Encomenda";
@@ -757,6 +629,21 @@
             const originalText = btn.innerHTML;
             btn.disabled = true; btn.innerHTML = "A gravar...";
             try {
+                const recipientName = document.getElementById('item-recipient').value.trim();
+                if (!recipientName) throw new Error("Destinatário é obrigatório");
+
+                let folderId;
+                const existingFolder = allFolders.find(f => normalizeString(f.nome) === normalizeString(recipientName));
+
+                if (existingFolder) {
+                    folderId = existingFolder.id;
+                } else {
+                    const { data: newFolder, error: folderError } = await supabase.from('pastas').insert([{ nome: recipientName }]).select().single();
+                    if (folderError) throw folderError;
+                    folderId = newFolder.id;
+                    await fetchFolders(); // Refresh local cache
+                }
+
                 const photoUrls = [];
                 for (const photo of currentPhotos) {
                     if (photo.file) {
@@ -770,15 +657,12 @@
                 const dateVal = document.getElementById('item-date').value;
                 const timeVal = document.getElementById('item-time').value;
                 const payload = {
+                    pasta_id: folderId,
                     descricao: document.getElementById('item-desc').value,
                     local_encontrado: document.getElementById('item-local').value,
                     data_encontrado: new Date(`${dateVal}T${timeVal}:00`).toISOString(),
                     anexo_url: photoUrls.length > 0 ? JSON.stringify(photoUrls) : null
                 };
-                if (!editId) {
-                    if (!currentFolder) throw new Error("Sessão expirada ou destinatário não selecionado");
-                    payload.pasta_id = currentFolder.id;
-                }
 
                 if (!document.getElementById('withdrawal-section').classList.contains('hidden')) {
                     payload.retirado_por = document.getElementById('withdraw-name').value;
@@ -794,8 +678,7 @@
                 const { error } = editId ? await supabase.from('achados').update(payload).eq('id', editId) : await supabase.from('achados').insert([payload]);
                 if (error) throw error;
                 closeModal('item-modal');
-                if (currentFolder) renderItems(currentFolder.id);
-                else if (viewMode === 'all-items') renderAllItems();
+                renderAllItems();
                 showMessage("Gravado", "green");
             } catch (err) { showMessage(err.message, 'red'); }
             finally { btn.disabled = false; btn.innerHTML = originalText; }
@@ -814,6 +697,7 @@
         }
 
         searchInput.oninput = filterContent;
+        document.getElementById('item-recipient').oninput = updateRecipientSuggestions;
 
         clearSearchBtn.onclick = () => {
             searchInput.value = '';
