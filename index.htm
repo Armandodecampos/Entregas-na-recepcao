@@ -234,6 +234,16 @@
 
 
 
+    <!-- Modal Foto Expandida -->
+    <div id="photo-modal" class="modal !z-[2000]" onclick="closeModal('photo-modal')">
+        <div class="relative w-full h-full flex items-center justify-center p-4 pointer-events-none">
+            <button onclick="event.stopPropagation(); closeModal('photo-modal')" class="absolute top-6 right-6 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg z-[2001] pointer-events-auto">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <img id="expanded-photo" src="" class="max-w-full max-h-full object-contain shadow-2xl rounded-lg pointer-events-auto">
+        </div>
+    </div>
+
     <!-- Modal Confirmação -->
     <div id="confirm-modal" class="modal">
         <div class="modal-content text-center relative">
@@ -405,7 +415,9 @@
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
         window.expandPhoto = (url) => {
-            if (url) window.open(url, '_blank');
+            if (!url) return;
+            document.getElementById('expanded-photo').src = url;
+            document.getElementById('photo-modal').style.display = 'flex';
         };
 
         window.showItemDetails = async (id) => {
