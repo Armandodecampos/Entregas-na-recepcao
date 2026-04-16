@@ -60,6 +60,19 @@
         .item-row:hover {
             transform: translateY(-1px);
         }
+
+        @keyframes infinite-scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .carousel-track {
+            display: flex;
+            width: max-content;
+            animation: infinite-scroll 10s linear infinite;
+        }
+        .carousel-track:hover {
+            animation-play-state: paused;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-300 min-h-[100dvh]">
@@ -228,6 +241,14 @@
         </div>
     </div>
 
+
+    <!-- Modal Foto Expandida -->
+    <div id="photo-modal" class="modal" onclick="closeModal('photo-modal')">
+        <div class="modal-content max-w-4xl p-0 bg-transparent border-0 shadow-none flex items-center justify-center relative">
+            <button onclick="event.stopPropagation(); closeModal('photo-modal')" class="absolute -top-10 right-0 text-white text-4xl hover:text-gray-300 transition">&times;</button>
+            <img id="expanded-photo" src="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+        </div>
+    </div>
 
     <!-- Modal Confirmação -->
     <div id="confirm-modal" class="modal">
@@ -398,6 +419,11 @@
         document.getElementById('confirm-no').onclick = () => closeModal('confirm-modal');
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
+        window.expandPhoto = (url) => {
+            document.getElementById('expanded-photo').src = url;
+            document.getElementById('photo-modal').style.display = 'flex';
+        };
+
         window.showItemDetails = async (id) => {
             const { data: item, error } = await supabase.from('achados').select('*').eq('id', id).single();
             if (error) return showMessage("Erro ao abrir detalhes", "red");
@@ -406,7 +432,7 @@
 
             if (photos.length > 0) {
                 photoContainer.innerHTML = photos.map(url =>
-                    `<img src="${url}" class="h-full w-auto object-contain bg-black flex-shrink-0 rounded-lg border border-gray-700">`
+                    `<img src="${url}" onclick="expandPhoto('${url}')" class="h-full w-auto object-contain bg-black flex-shrink-0 rounded-lg border border-gray-700 cursor-zoom-in hover:opacity-90 transition">`
                 ).join('');
             } else {
                 photoContainer.innerHTML = `<div class="w-full text-center text-gray-500"><i class="fas fa-box-open text-6xl mb-2"></i><br>Sem foto</div>`;
@@ -549,14 +575,26 @@
                 const displayDate = new Date(item.data_encontrado).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 const isWithdrawn = !!item.retirado_por;
                 const photos = parseAnexoUrl(item.anexo_url);
-                const thumb = photos.length > 0 ? photos[0] : null;
+
+                let photoContent = `<i class="fas fa-box text-gray-500 text-xl"></i>`;
+                if (photos.length === 1) {
+                    photoContent = `<img src="${photos[0]}" class="w-full h-full object-cover">`;
+                } else if (photos.length > 1) {
+                    // Duplicate photos for infinite loop effect
+                    const extendedPhotos = [...photos, ...photos];
+                    photoContent = `
+                        <div class="carousel-track h-full">
+                            ${extendedPhotos.map(url => `<img src="${url}" class="h-full w-14 sm:w-16 object-cover flex-shrink-0 border-r border-gray-900/20">`).join('')}
+                        </div>
+                    `;
+                }
 
                 row.className = `flex flex-col md:flex-row md:items-center justify-between p-4 ${isWithdrawn ? 'bg-amber-900/40 border-amber-500/50' : 'bg-gray-800 border-gray-700'} rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row`;
                 row.onclick = () => window.showItemDetails(item.id);
                 row.innerHTML = `
                     <div class="flex items-center space-x-4 min-w-0 flex-1">
-                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center">
-                            ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-500 text-xl"></i>`}
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center relative">
+                            ${photoContent}
                         </div>
                         <div class="min-w-0 flex-1">
                             <h4 class="text-white font-bold text-base sm:text-lg break-all">${item.descricao}</h4>
