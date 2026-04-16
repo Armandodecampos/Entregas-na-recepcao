@@ -61,11 +61,6 @@
             transform: translateY(-1px);
         }
 
-        .carousel-track {
-            display: flex;
-            width: max-content;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-300 min-h-[100dvh]">
@@ -110,8 +105,8 @@
                 <div class="relative flex-grow">
                     <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
                     <input type="text" id="search-input" placeholder="Pesquisar..." class="w-full pl-12 pr-12 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
-                    <button id="clear-search" class="hidden absolute right-4 top-3.5 text-gray-500 hover:text-gray-300 transition">
-                        <i class="fas fa-times-circle"></i>
+                    <button id="clear-search" class="hidden absolute right-4 top-3.5 bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg">
+                        <i class="fas fa-times text-xs"></i>
                     </button>
                 </div>
             </div>
@@ -125,7 +120,7 @@
         <div class="modal-content max-w-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-white">Detalhes</h3>
-                <button onclick="closeModal('detail-modal')" class="text-gray-400 hover:text-white transition text-2xl p-2">&times;</button>
+                <button onclick="closeModal('detail-modal')" class="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-6">
                 <div id="detail-photo-container" class="w-full h-48 sm:h-80 bg-gray-800 rounded-xl overflow-x-auto overflow-y-hidden border border-gray-700 flex items-center p-2 gap-2 custom-scrollbar"></div>
@@ -168,7 +163,10 @@
     <!-- Modal Encomenda -->
     <div id="item-modal" class="modal">
         <div class="modal-content max-w-lg">
-            <h3 id="item-modal-title" class="text-xl font-bold text-white mb-4">Registar Encomenda</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="item-modal-title" class="text-xl font-bold text-white">Registar Encomenda</h3>
+                <button type="button" onclick="closeModal('item-modal')" class="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg"><i class="fas fa-times"></i></button>
+            </div>
             <button type="button" id="btn-withdraw" onclick="toggleWithdrawal()" class="hidden w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg transition mb-4">
                 <i class="fas fa-check-circle mr-2"></i>Marcar como retirado
             </button>
@@ -235,17 +233,11 @@
     </div>
 
 
-    <!-- Modal Foto Expandida -->
-    <div id="photo-modal" class="modal !z-[2000]" onclick="closeModal('photo-modal')">
-        <div class="modal-content w-full h-full max-w-none p-0 bg-transparent border-0 shadow-none flex items-center justify-center relative rounded-none">
-            <button onclick="event.stopPropagation(); closeModal('photo-modal')" class="absolute top-4 right-4 text-white text-5xl hover:text-gray-300 transition z-50">&times;</button>
-            <img id="expanded-photo" src="" class="max-w-full max-h-full object-contain shadow-2xl">
-        </div>
-    </div>
 
     <!-- Modal Confirmação -->
     <div id="confirm-modal" class="modal">
-        <div class="modal-content text-center">
+        <div class="modal-content text-center relative">
+            <button onclick="closeModal('confirm-modal')" class="absolute top-4 right-4 bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg"><i class="fas fa-times"></i></button>
             <div class="text-red-500 text-4xl mb-4"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 class="text-xl font-bold text-white mb-2">Confirmar Exclusão</h3>
             <p id="confirm-message" class="text-gray-400 mb-6 break-all">Deseja realmente excluir este registo?</p>
@@ -413,8 +405,7 @@
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
         window.expandPhoto = (url) => {
-            document.getElementById('expanded-photo').src = url;
-            document.getElementById('photo-modal').style.display = 'flex';
+            if (url) window.open(url, '_blank');
         };
 
         window.showItemDetails = async (id) => {
@@ -570,23 +561,16 @@
                 const photos = parseAnexoUrl(item.anexo_url);
 
                 let photoContent = `<i class="fas fa-box text-gray-500 text-xl"></i>`;
-                if (photos.length === 1) {
+                if (photos.length > 0) {
                     photoContent = `<img src="${photos[0]}" class="w-full h-full object-cover">`;
-                } else if (photos.length > 1) {
-                    // Add first photo clone at the end for seamless loop
-                    const extendedPhotos = [...photos, photos[0]];
-                    photoContent = `
-                        <div class="carousel-track h-full" data-index="0" data-total="${photos.length}">
-                            ${extendedPhotos.map(url => `<img src="${url}" class="h-full w-14 sm:w-16 object-cover flex-shrink-0 border-r border-gray-900/20">`).join('')}
-                        </div>
-                    `;
                 }
 
                 row.className = `flex flex-col md:flex-row md:items-center justify-between p-4 ${isWithdrawn ? 'bg-amber-900/40 border-amber-500/50' : 'bg-gray-800 border-gray-700'} rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row`;
                 row.onclick = () => window.showItemDetails(item.id);
+                const photoOnclick = photos.length > 0 ? `onclick="event.stopPropagation(); window.expandPhoto('${photos[0]}')"` : '';
                 row.innerHTML = `
                     <div class="flex items-center space-x-4 min-w-0 flex-1">
-                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center relative">
+                        <div ${photoOnclick} class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center relative ${photos.length > 0 ? 'cursor-pointer' : ''}">
                             ${photoContent}
                         </div>
                         <div class="min-w-0 flex-1">
@@ -747,32 +731,6 @@
             }
         };
 
-        function advanceCarousels() {
-            document.querySelectorAll('.carousel-track').forEach(track => {
-                const firstChild = track.firstElementChild;
-                if (!firstChild) return;
-                const photoWidth = firstChild.offsetWidth;
-                if (photoWidth === 0) return;
-
-                let index = parseInt(track.dataset.index);
-                const total = parseInt(track.dataset.total);
-
-                index++;
-                track.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                track.style.transform = `translateX(-${index * photoWidth}px)`;
-                track.dataset.index = index;
-
-                if (index === total) {
-                    setTimeout(() => {
-                        track.style.transition = 'none';
-                        track.style.transform = 'translateX(0)';
-                        track.dataset.index = 0;
-                    }, 600);
-                }
-            });
-        }
-
-        setInterval(advanceCarousels, 5000);
     </script>
 </body>
 </html>
