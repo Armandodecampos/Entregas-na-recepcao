@@ -126,7 +126,7 @@
                 <button onclick="closeModal('detail-modal')" class="text-gray-400 hover:text-white transition text-2xl p-2">&times;</button>
             </div>
             <div class="space-y-6">
-                <div id="detail-photo-container" class="w-full h-48 sm:h-80 bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex items-center justify-center"></div>
+                <div id="detail-photo-container" class="w-full h-48 sm:h-80 bg-gray-800 rounded-xl overflow-x-auto overflow-y-hidden border border-gray-700 flex items-center p-2 gap-2 custom-scrollbar"></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="bg-gray-700/50 p-4 rounded-lg min-w-0">
                         <label class="text-xs text-gray-400 uppercase font-bold block mb-1">Descrição</label>
@@ -192,13 +192,13 @@
                 </div>
                 <div class="space-y-2">
                     <div class="flex flex-col sm:flex-row items-center gap-2">
-                        <input type="file" id="item-photo" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                        <input type="file" id="item-photo" accept="image/*" multiple class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
                         <button type="button" onclick="openCamera()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition flex-shrink-0">
                             <i class="fas fa-camera mr-2"></i>Tirar Foto
                         </button>
                     </div>
-                    <div id="photo-preview-container" class="hidden w-full h-40 bg-gray-800 rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center">
-                        <img id="photo-preview" class="h-full w-auto object-contain">
+                    <div id="photo-preview-container" class="hidden w-full p-2 bg-gray-800 rounded-lg border border-gray-700">
+                        <div id="photo-previews-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
                     </div>
                 </div>
                 <div id="withdrawal-section" class="hidden space-y-4 border-t border-gray-600 pt-4 mt-4">
@@ -261,11 +261,21 @@
 
         let currentFolder = null;
         let deleteAction = null;
-        let capturedFile = null;
+        let currentPhotos = []; // Array de { file: File, url: string, preview: string }
         let cameraStream = null;
 
         function normalizeString(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        window.parseAnexoUrl = (url) => {
+            if (!url) return [];
+            try {
+                const parsed = JSON.parse(url);
+                return Array.isArray(parsed) ? parsed : [url];
+            } catch (e) {
+                return [url];
+            }
         }
 
         function getLocalISODateTime() {
@@ -320,6 +330,41 @@
             document.getElementById('camera-modal').style.display = 'none';
         };
 
+        window.renderPhotoPreviews = () => {
+            const container = document.getElementById('photo-preview-container');
+            const grid = document.getElementById('photo-previews-grid');
+            grid.innerHTML = '';
+
+            if (currentPhotos.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            currentPhotos.forEach((photo, index) => {
+                if (photo.file && !photo.preview) {
+                    photo.preview = URL.createObjectURL(photo.file);
+                }
+                const src = photo.preview || photo.url;
+                const div = document.createElement('div');
+                div.className = 'relative aspect-square bg-gray-700 rounded-lg overflow-hidden border border-gray-600';
+                div.innerHTML = `
+                    <img src="${src}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removePhoto(${index})" class="absolute top-1 right-1 bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-lg hover:bg-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                grid.appendChild(div);
+            });
+        };
+
+        window.removePhoto = (index) => {
+            const photo = currentPhotos[index];
+            if (photo.preview) URL.revokeObjectURL(photo.preview);
+            currentPhotos.splice(index, 1);
+            renderPhotoPreviews();
+        };
+
         window.takePhoto = () => {
             const video = document.getElementById('camera-video');
             const canvas = document.createElement('canvas');
@@ -333,24 +378,19 @@
             ctx.drawImage(video, sx, sy, size, size, 0, 0, 300, 300);
 
             canvas.toBlob((blob) => {
-                capturedFile = new File([blob], "camera_photo.jpg", { type: "image/jpeg" });
-                const preview = document.getElementById('photo-preview');
-                const container = document.getElementById('photo-preview-container');
-                preview.src = URL.createObjectURL(blob);
-                container.classList.remove('hidden');
+                const file = new File([blob], `camera_${Date.now()}.jpg`, { type: "image/jpeg" });
+                currentPhotos.push({ file });
+                renderPhotoPreviews();
                 stopCamera();
             }, 'image/jpeg', 0.8);
         };
 
         document.getElementById('item-photo').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                capturedFile = null;
-                const preview = document.getElementById('photo-preview');
-                const container = document.getElementById('photo-preview-container');
-                preview.src = URL.createObjectURL(file);
-                container.classList.remove('hidden');
-            }
+            Array.from(e.target.files).forEach(file => {
+                currentPhotos.push({ file });
+            });
+            renderPhotoPreviews();
+            e.target.value = ''; // Reset to allow same file selection
         };
 
         function customConfirm(message, onConfirm) {
@@ -372,9 +412,16 @@
             const { data: item, error } = await supabase.from('achados').select('*').eq('id', id).single();
             if (error) return showMessage("Erro ao abrir detalhes", "red");
             const photoContainer = document.getElementById('detail-photo-container');
-            photoContainer.innerHTML = item.anexo_url 
-                ? `<img src="${item.anexo_url}" class="w-full h-full object-contain bg-black">` 
-                : `<div class="text-center text-gray-500"><i class="fas fa-box-open text-6xl mb-2"></i><br>Sem foto</div>`;
+            const photos = parseAnexoUrl(item.anexo_url);
+
+            if (photos.length > 0) {
+                photoContainer.innerHTML = photos.map(url =>
+                    `<img src="${url}" class="h-full w-auto object-contain bg-black flex-shrink-0 rounded-lg border border-gray-700">`
+                ).join('');
+            } else {
+                photoContainer.innerHTML = `<div class="w-full text-center text-gray-500"><i class="fas fa-box-open text-6xl mb-2"></i><br>Sem foto</div>`;
+            }
+
             const dateObj = new Date(item.data_encontrado);
             document.getElementById('detail-desc').textContent = item.descricao;
             document.getElementById('detail-local').textContent = item.local_encontrado;
@@ -437,9 +484,8 @@
                 withdrawSection.classList.add('hidden');
             }
 
-            capturedFile = null;
-            document.getElementById('photo-preview-container').classList.add('hidden');
-            document.getElementById('photo-preview').src = '';
+            currentPhotos = parseAnexoUrl(item.anexo_url).map(url => ({ url }));
+            renderPhotoPreviews();
             document.getElementById('item-modal').style.display = 'flex';
         };
 
@@ -541,12 +587,15 @@
                 const row = document.createElement('div');
                 const displayDate = new Date(item.data_encontrado).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 const isWithdrawn = !!item.retirado_por;
+                const photos = parseAnexoUrl(item.anexo_url);
+                const thumb = photos.length > 0 ? photos[0] : null;
+
                 row.className = `flex flex-col md:flex-row md:items-center justify-between p-4 ${isWithdrawn ? 'bg-amber-900/40 border-amber-500/50' : 'bg-gray-800 border-gray-700'} rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row`;
                 row.onclick = () => window.showItemDetails(item.id);
                 row.innerHTML = `
                     <div class="flex items-center space-x-4 min-w-0 flex-1">
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-600 flex items-center justify-center">
-                            ${item.anexo_url ? `<img src="${item.anexo_url}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-500 text-xl"></i>`}
+                            ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-500 text-xl"></i>`}
                         </div>
                         <div class="min-w-0 flex-1">
                             <h4 class="text-white font-bold text-base sm:text-lg break-all">${item.descricao}</h4>
@@ -620,9 +669,9 @@
             btnWithdraw.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Marcar como retirado';
             document.getElementById('withdrawal-section').classList.add('hidden');
 
-            capturedFile = null;
-            document.getElementById('photo-preview-container').classList.add('hidden');
-            document.getElementById('photo-preview').src = '';
+            currentPhotos.forEach(p => p.preview && URL.revokeObjectURL(p.preview));
+            currentPhotos = [];
+            renderPhotoPreviews();
             document.getElementById('item-modal').style.display = 'flex';
         };
 
@@ -633,16 +682,24 @@
             const originalText = btn.innerHTML;
             btn.disabled = true; btn.innerHTML = "A gravar...";
             try {
-                const file = capturedFile || document.getElementById('item-photo').files[0];
-                const photoUrl = file ? await uploadPhoto(file) : null;
+                const photoUrls = [];
+                for (const photo of currentPhotos) {
+                    if (photo.file) {
+                        const url = await uploadPhoto(photo.file);
+                        photoUrls.push(url);
+                    } else if (photo.url) {
+                        photoUrls.push(photo.url);
+                    }
+                }
+
                 const dateVal = document.getElementById('item-date').value;
                 const timeVal = document.getElementById('item-time').value;
                 const payload = {
                     descricao: document.getElementById('item-desc').value,
                     local_encontrado: document.getElementById('item-local').value,
                     data_encontrado: new Date(`${dateVal}T${timeVal}:00`).toISOString(),
+                    anexo_url: photoUrls.length > 0 ? JSON.stringify(photoUrls) : null
                 };
-                if (photoUrl) payload.anexo_url = photoUrl;
                 if (!editId) {
                     if (!currentFolder) throw new Error("Sessão expirada ou destinatário não selecionado");
                     payload.pasta_id = currentFolder.id;
