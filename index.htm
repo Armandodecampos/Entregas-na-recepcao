@@ -378,10 +378,10 @@
             const sx = (video.videoWidth - size) / 2;
             const sy = (video.videoHeight - size) / 2;
 
-            canvas.width = 300;
-            canvas.height = 300;
+            canvas.width = 600;
+            canvas.height = 600;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, sx, sy, size, size, 0, 0, 300, 300);
+            ctx.drawImage(video, sx, sy, size, size, 0, 0, 600, 600);
 
             canvas.toBlob((blob) => {
                 const file = new File([blob], `camera_${Date.now()}.jpg`, { type: "image/jpeg" });
