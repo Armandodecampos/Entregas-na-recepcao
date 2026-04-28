@@ -101,13 +101,18 @@
         </header>
 
         <div class="bg-gray-900 p-4 px-6 lg:px-12">
-            <div class="relative max-w-2xl mx-auto flex gap-2">
+            <div class="relative max-w-2xl mx-auto flex flex-col gap-4">
                 <div class="relative flex-grow">
                     <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
                     <input type="text" id="search-input" placeholder="Pesquisar..." class="w-full pl-12 pr-12 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
                     <button id="clear-search" class="hidden absolute right-4 top-3.5 bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg">
                         <i class="fas fa-times text-xs"></i>
                     </button>
+                </div>
+                <div class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                    <button id="filter-all" onclick="setFilter('all')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-blue-600 text-white border border-blue-500 shadow-lg whitespace-nowrap">Todos</button>
+                    <button id="filter-delivered" onclick="setFilter('delivered')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700 whitespace-nowrap">Entregados</button>
+                    <button id="filter-pending" onclick="setFilter('pending')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700 whitespace-nowrap">Não entregados</button>
                 </div>
             </div>
         </div>
@@ -273,6 +278,35 @@
         let allFolders = [];
         let currentPhotos = []; // Array de { file: File, url: string, preview: string }
         let cameraStream = null;
+        let currentFilter = 'all';
+
+        window.setFilter = (filter) => {
+            currentFilter = filter;
+
+            // Atualizar estilos dos botões
+            const buttons = {
+                'all': document.getElementById('filter-all'),
+                'delivered': document.getElementById('filter-delivered'),
+                'pending': document.getElementById('filter-pending')
+            };
+
+            Object.keys(buttons).forEach(key => {
+                const btn = buttons[key];
+                if (key === filter) {
+                    btn.classList.replace('bg-gray-800', 'bg-blue-600');
+                    btn.classList.replace('text-gray-400', 'text-white');
+                    btn.classList.replace('border-gray-700', 'border-blue-500');
+                    btn.classList.add('shadow-lg');
+                } else {
+                    btn.classList.replace('bg-blue-600', 'bg-gray-800');
+                    btn.classList.replace('text-white', 'text-gray-400');
+                    btn.classList.replace('border-blue-500', 'border-gray-700');
+                    btn.classList.remove('shadow-lg');
+                }
+            });
+
+            filterContent();
+        };
 
         function normalizeString(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -585,6 +619,7 @@
                 }
 
                 row.className = `flex flex-col md:flex-row md:items-center justify-between p-4 ${isWithdrawn ? 'bg-amber-900/40 border-amber-500/50' : 'bg-gray-800 border-gray-700'} rounded-xl shadow-md w-full max-w-5xl mx-auto space-y-4 md:space-y-0 cursor-pointer hover:border-blue-500/50 transition item-row`;
+                row.dataset.withdrawn = isWithdrawn;
                 row.onclick = () => window.showItemDetails(item.id);
                 const photoOnclick = '';
                 row.innerHTML = `
@@ -608,6 +643,7 @@
                 `;
                 container.appendChild(row);
             });
+            filterContent();
         }
 
 
@@ -726,7 +762,18 @@
             clearSearchBtn.classList.toggle('hidden', !searchInput.value);
             document.querySelectorAll('#content-grid > div').forEach(card => {
                 const text = normalizeString(card.textContent);
-                card.style.display = text.includes(term) ? 'flex' : 'none';
+                const matchesSearch = text.includes(term);
+
+                let matchesFilter = true;
+                const isWithdrawn = card.dataset.withdrawn === 'true';
+
+                if (currentFilter === 'delivered') {
+                    matchesFilter = isWithdrawn;
+                } else if (currentFilter === 'pending') {
+                    matchesFilter = !isWithdrawn;
+                }
+
+                card.style.display = (matchesSearch && matchesFilter) ? 'flex' : 'none';
             });
         }
 
