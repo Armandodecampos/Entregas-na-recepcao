@@ -102,11 +102,16 @@
 
         <div class="bg-gray-900 p-4 px-6 lg:px-12">
             <div class="relative max-w-2xl mx-auto flex flex-col gap-6">
-                <div class="relative flex-grow">
-                    <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
-                    <input type="text" id="search-input" placeholder="Pesquisar..." class="w-full pl-12 pr-12 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
-                    <button id="clear-search" class="hidden absolute right-4 top-3.5 bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg">
-                        <i class="fas fa-times text-xs"></i>
+                <div class="flex items-center gap-3 w-full">
+                    <div class="relative flex-grow">
+                        <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
+                        <input type="text" id="search-input" placeholder="Pesquisar..." class="w-full pl-12 pr-12 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
+                        <button id="clear-search" class="hidden absolute right-4 top-3.5 bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                    <button id="btn-ranking" onclick="openRankingModal()" title="Ranking de Entregas" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold p-3 rounded-xl transition shadow-lg flex items-center justify-center h-[50px] w-[50px] flex-shrink-0">
+                        <i class="fas fa-trophy text-xl"></i>
                     </button>
                 </div>
                 <div class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
@@ -250,6 +255,38 @@
                 <i class="fas fa-times text-xl"></i>
             </button>
             <img id="expanded-photo" src="" class="w-full h-full object-contain shadow-2xl pointer-events-auto">
+        </div>
+    </div>
+
+    <!-- Modal Ranking de Entregas -->
+    <div id="ranking-modal" class="modal">
+        <div class="modal-content max-w-2xl text-center">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-trophy text-amber-400 text-2xl"></i>
+                    <h3 class="text-xl font-bold text-white">Campeão das Encomendas 🏆</h3>
+                </div>
+                <button onclick="closeModal('ranking-modal')" class="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-700 transition shadow-lg">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Mês Selector -->
+            <div class="mb-6 flex justify-center items-center gap-3">
+                <label for="ranking-month-select" class="text-sm font-semibold text-gray-300">Mês:</label>
+                <input type="month" id="ranking-month-select" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <!-- Podio Container -->
+            <div id="ranking-podium-container" class="space-y-6">
+                <!-- Javascript will inject podium or empty state here -->
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-700">
+                <button onclick="closeModal('ranking-modal')" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2.5 rounded-lg transition uppercase tracking-wide">
+                    Fechar
+                </button>
+            </div>
         </div>
     </div>
 
@@ -548,6 +585,170 @@
             const { data, error } = await supabase.from('pastas').select('*');
             if (!error) allFolders = data || [];
         }
+
+        async function getMonthlyRankingData(yearMonth) {
+            // yearMonth format: "YYYY-MM"
+            const { data: items, error: itemsErr } = await supabase.from('achados').select('pasta_id, data_encontrado');
+            if (itemsErr) {
+                console.error("Erro ao buscar encomendas:", itemsErr);
+                return [];
+            }
+
+            const { data: folders, error: foldersErr } = await supabase.from('pastas').select('id, nome');
+            if (foldersErr) {
+                console.error("Erro ao buscar destinatários:", foldersErr);
+                return [];
+            }
+
+            const folderMap = {};
+            folders?.forEach(f => folderMap[f.id] = f.nome);
+
+            const countsMap = {}; // name -> count
+
+            items?.forEach(item => {
+                if (!item.data_encontrado) return;
+                const itemYearMonth = item.data_encontrado.substring(0, 7);
+                if (itemYearMonth === yearMonth) {
+                    const recipientName = folderMap[item.pasta_id] || 'Desconhecido';
+                    countsMap[recipientName] = (countsMap[recipientName] || 0) + 1;
+                }
+            });
+
+            const rankingList = Object.keys(countsMap).map(name => ({
+                name,
+                count: countsMap[name]
+            }));
+
+            // Sort descending by count, then alphabetically by name
+            rankingList.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+            return rankingList;
+        }
+
+        window.openRankingModal = async () => {
+            const select = document.getElementById('ranking-month-select');
+            if (!select.value) {
+                const now = new Date();
+                select.value = now.toISOString().substring(0, 7);
+            }
+            await renderRankingModal();
+            document.getElementById('ranking-modal').style.display = 'flex';
+        };
+
+        window.renderRankingModal = async () => {
+            const container = document.getElementById('ranking-podium-container');
+            const selectedMonth = document.getElementById('ranking-month-select').value;
+
+            container.innerHTML = '<div class="py-8 text-gray-400"><div class="loading-spinner"></div>A carregar ranking...</div>';
+
+            const ranking = await getMonthlyRankingData(selectedMonth);
+
+            if (!ranking || ranking.length === 0) {
+                container.innerHTML = `
+                    <div class="py-10 text-gray-400 space-y-3">
+                        <i class="fas fa-ghost text-5xl text-gray-600"></i>
+                        <p class="text-base font-medium">Nenhuma encomenda registada neste mês!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const first = ranking[0];
+            const second = ranking[1];
+            const third = ranking[2];
+
+            let podiumHTML = `
+                <div class="pt-4 flex flex-col items-center justify-center gap-6">
+                    <!-- Pódio Visual (1º, 2º e 3º Lugar) -->
+                    <div class="flex items-end justify-center gap-3 sm:gap-6 w-full max-w-md pt-6 pb-2">
+            `;
+
+            // 2º Lugar
+            if (second) {
+                podiumHTML += `
+                    <div class="flex flex-col items-center flex-1 order-1">
+                        <div class="text-3xl mb-1 text-slate-300 animate-bounce" style="animation-duration: 2.2s;">
+                            <i class="fas fa-trophy drop-shadow-md"></i>
+                        </div>
+                        <div class="text-xs sm:text-sm font-bold text-slate-300 break-all px-1 text-center line-clamp-2">${second.name}</div>
+                        <div class="text-xs font-extrabold text-amber-400 mt-0.5">${second.count} ${second.count === 1 ? 'pedido' : 'pedidos'}</div>
+                        <div class="w-full bg-slate-700 border-t-4 border-slate-400 rounded-t-lg h-24 sm:h-28 flex items-center justify-center shadow-lg mt-2">
+                            <span class="text-2xl font-black text-slate-300">2º</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                podiumHTML += `<div class="flex-1 order-1"></div>`;
+            }
+
+            // 1º Lugar
+            podiumHTML += `
+                <div class="flex flex-col items-center flex-1 order-2 -mt-4">
+                    <div class="text-4xl mb-1 text-yellow-400 animate-bounce" style="animation-duration: 1.8s;">
+                        <i class="fas fa-trophy drop-shadow-lg"></i>
+                    </div>
+                    <div class="text-sm sm:text-base font-extrabold text-amber-300 break-all px-1 text-center line-clamp-2">${first.name}</div>
+                    <div class="text-xs sm:text-sm font-extrabold text-amber-400 mt-0.5">${first.count} ${first.count === 1 ? 'pedido' : 'pedidos'}</div>
+                    <div class="w-full bg-amber-600 border-t-4 border-yellow-300 rounded-t-lg h-32 sm:h-36 flex flex-col items-center justify-center shadow-2xl mt-2 relative overflow-hidden">
+                        <span class="text-3xl sm:text-4xl font-black text-yellow-200">1º</span>
+                        <span class="text-[10px] font-bold tracking-wider uppercase text-amber-100 bg-amber-700/60 px-2 py-0.5 rounded-full mt-1">Campeão</span>
+                    </div>
+                </div>
+            `;
+
+            // 3º Lugar
+            if (third) {
+                podiumHTML += `
+                    <div class="flex flex-col items-center flex-1 order-3">
+                        <div class="text-2xl mb-1 text-amber-600 animate-bounce" style="animation-duration: 2.6s;">
+                            <i class="fas fa-trophy drop-shadow-md"></i>
+                        </div>
+                        <div class="text-xs sm:text-sm font-bold text-amber-600 break-all px-1 text-center line-clamp-2">${third.name}</div>
+                        <div class="text-xs font-extrabold text-amber-400 mt-0.5">${third.count} ${third.count === 1 ? 'pedido' : 'pedidos'}</div>
+                        <div class="w-full bg-amber-900/80 border-t-4 border-amber-600 rounded-t-lg h-16 sm:h-20 flex items-center justify-center shadow-lg mt-2">
+                            <span class="text-xl font-black text-amber-500">3º</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                podiumHTML += `<div class="flex-1 order-3"></div>`;
+            }
+
+            podiumHTML += `
+                    </div>
+                </div>
+            `;
+
+            // Outros lugares se houver mais de 3
+            if (ranking.length > 3) {
+                podiumHTML += `
+                    <div class="mt-4 border-t border-gray-700/60 pt-3 text-left">
+                        <h4 class="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2 px-1">Outros Mencionados</h4>
+                        <div class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar pr-1">
+                `;
+
+                for (let i = 3; i < ranking.length; i++) {
+                    const item = ranking[i];
+                    podiumHTML += `
+                        <div class="flex justify-between items-center bg-gray-800/80 px-3 py-2 rounded-lg text-sm border border-gray-700/50">
+                            <span class="text-gray-300 font-medium break-all"><strong class="text-gray-500 mr-2">${i + 1}º</strong>${item.name}</span>
+                            <span class="text-amber-400 font-bold ml-2 whitespace-nowrap">${item.count} ${item.count === 1 ? 'pedido' : 'pedidos'}</span>
+                        </div>
+                    `;
+                }
+
+                podiumHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = podiumHTML;
+        };
+
+        document.getElementById('ranking-month-select').onchange = () => {
+            renderRankingModal();
+        };
 
         window.selectRecipient = (nome) => {
             document.getElementById('item-recipient').value = nome;
