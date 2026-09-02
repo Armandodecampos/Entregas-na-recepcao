@@ -271,10 +271,16 @@
                 </button>
             </div>
 
-            <!-- Mês Selector -->
-            <div class="mb-6 flex justify-center items-center gap-3">
-                <label for="ranking-month-select" class="text-sm font-semibold text-gray-300">Mês:</label>
-                <input type="month" id="ranking-month-select" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <!-- Period / Month Selector -->
+            <div class="mb-6 flex flex-wrap justify-center items-center gap-3">
+                <div class="flex items-center gap-2 bg-gray-800 p-1.5 rounded-xl border border-gray-700">
+                    <button id="ranking-type-month" onclick="setRankingType('month')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-gray-900 shadow">Por Mês</button>
+                    <button id="ranking-type-all" onclick="setRankingType('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-700 text-gray-300 hover:text-white">Geral (Todas as datas)</button>
+                </div>
+                <div id="ranking-month-picker-wrapper" class="flex items-center gap-2">
+                    <label for="ranking-month-select" class="text-sm font-semibold text-gray-300">Mês:</label>
+                    <input type="month" id="ranking-month-select" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
             </div>
 
             <!-- Podio Container -->
@@ -316,6 +322,25 @@
         let currentPhotos = []; // Array de { file: File, url: string, preview: string }
         let cameraStream = null;
         let currentFilter = 'all';
+        let rankingMode = 'month'; // 'month' or 'all'
+
+        window.setRankingType = (mode) => {
+            rankingMode = mode;
+            const btnMonth = document.getElementById('ranking-type-month');
+            const btnAll = document.getElementById('ranking-type-all');
+            const wrapper = document.getElementById('ranking-month-picker-wrapper');
+
+            if (mode === 'month') {
+                btnMonth.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-gray-900 shadow";
+                btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-700 text-gray-300 hover:text-white";
+                wrapper.classList.remove('hidden');
+            } else {
+                btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-gray-900 shadow";
+                btnMonth.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-700 text-gray-300 hover:text-white";
+                wrapper.classList.add('hidden');
+            }
+            renderRankingModal();
+        };
 
         window.setFilter = (filter) => {
             currentFilter = filter;
@@ -586,8 +611,8 @@
             if (!error) allFolders = data || [];
         }
 
-        async function getMonthlyRankingData(yearMonth) {
-            // yearMonth format: "YYYY-MM"
+        async function getRankingData(yearMonth = null) {
+            // yearMonth format: "YYYY-MM" or null/empty for all-time
             const { data: items, error: itemsErr } = await supabase.from('achados').select('pasta_id, data_encontrado');
             if (itemsErr) {
                 console.error("Erro ao buscar encomendas:", itemsErr);
@@ -608,7 +633,7 @@
             items?.forEach(item => {
                 if (!item.data_encontrado) return;
                 const itemYearMonth = item.data_encontrado.substring(0, 7);
-                if (itemYearMonth === yearMonth) {
+                if (!yearMonth || itemYearMonth === yearMonth) {
                     const recipientName = folderMap[item.pasta_id] || 'Desconhecido';
                     const itemDate = new Date(item.data_encontrado).getTime();
 
@@ -648,17 +673,17 @@
 
         window.renderRankingModal = async () => {
             const container = document.getElementById('ranking-podium-container');
-            const selectedMonth = document.getElementById('ranking-month-select').value;
+            const selectedMonth = rankingMode === 'month' ? document.getElementById('ranking-month-select').value : null;
 
             container.innerHTML = '<div class="py-8 text-gray-400"><div class="loading-spinner"></div>A carregar ranking...</div>';
 
-            const ranking = await getMonthlyRankingData(selectedMonth);
+            const ranking = await getRankingData(selectedMonth);
 
             if (!ranking || ranking.length === 0) {
                 container.innerHTML = `
                     <div class="py-10 text-gray-400 space-y-3">
                         <i class="fas fa-ghost text-5xl text-gray-600"></i>
-                        <p class="text-base font-medium">Nenhuma encomenda registada neste mês!</p>
+                        <p class="text-base font-medium">Nenhuma encomenda registada ${rankingMode === 'month' ? 'neste mês' : 'no sistema'}!</p>
                     </div>
                 `;
                 return;
