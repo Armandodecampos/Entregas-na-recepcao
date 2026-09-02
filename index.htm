@@ -603,24 +603,34 @@
             const folderMap = {};
             folders?.forEach(f => folderMap[f.id] = f.nome);
 
-            const countsMap = {}; // name -> count
+            const statsMap = {}; // name -> { count, lastDate }
 
             items?.forEach(item => {
                 if (!item.data_encontrado) return;
                 const itemYearMonth = item.data_encontrado.substring(0, 7);
                 if (itemYearMonth === yearMonth) {
                     const recipientName = folderMap[item.pasta_id] || 'Desconhecido';
-                    countsMap[recipientName] = (countsMap[recipientName] || 0) + 1;
+                    const itemDate = new Date(item.data_encontrado).getTime();
+
+                    if (!statsMap[recipientName]) {
+                        statsMap[recipientName] = { count: 1, lastDate: itemDate };
+                    } else {
+                        statsMap[recipientName].count += 1;
+                        if (itemDate > statsMap[recipientName].lastDate) {
+                            statsMap[recipientName].lastDate = itemDate;
+                        }
+                    }
                 }
             });
 
-            const rankingList = Object.keys(countsMap).map(name => ({
+            const rankingList = Object.keys(statsMap).map(name => ({
                 name,
-                count: countsMap[name]
+                count: statsMap[name].count,
+                lastDate: statsMap[name].lastDate
             }));
 
-            // Sort descending by count, then alphabetically by name
-            rankingList.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+            // Sort descending by count, then descending by most recent order date, then alphabetically
+            rankingList.sort((a, b) => b.count - a.count || b.lastDate - a.lastDate || a.name.localeCompare(b.name));
 
             return rankingList;
         }
