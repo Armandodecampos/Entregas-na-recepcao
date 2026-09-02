@@ -626,11 +626,12 @@
             const rankingList = Object.keys(statsMap).map(name => ({
                 name,
                 count: statsMap[name].count,
-                lastDate: statsMap[name].lastDate
+                lastDate: statsMap[name].lastDate,
+                randomVal: Math.random()
             }));
 
-            // Sort descending by count, then descending by most recent order date, then alphabetically
-            rankingList.sort((a, b) => b.count - a.count || b.lastDate - a.lastDate || a.name.localeCompare(b.name));
+            // Sort descending by count, then descending by most recent order date, then randomly if still tied
+            rankingList.sort((a, b) => b.count - a.count || b.lastDate - a.lastDate || b.randomVal - a.randomVal);
 
             return rankingList;
         }
