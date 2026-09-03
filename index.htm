@@ -703,12 +703,12 @@
             if (second) {
                 podiumHTML += `
                     <div class="flex flex-col items-center flex-1 order-1">
-                        <div class="text-3xl mb-1 text-slate-300 animate-bounce" style="animation-duration: 2.2s;">
-                            <i class="fas fa-trophy drop-shadow-md"></i>
+                        <div class="text-3xl mb-1 text-slate-300">
+                            <i class="fas fa-trophy"></i>
                         </div>
                         <div class="text-xs sm:text-sm font-bold text-slate-300 break-all px-1 text-center line-clamp-2">${second.name}</div>
                         <div class="text-xs font-extrabold text-amber-400 mt-0.5">${second.count} ${second.count === 1 ? 'pedido' : 'pedidos'}</div>
-                        <div class="w-full bg-slate-700 border-t-4 border-slate-400 rounded-t-lg h-24 sm:h-28 flex items-center justify-center shadow-lg mt-2">
+                        <div class="w-full bg-slate-700 border-t-4 border-slate-400 rounded-t-lg h-24 sm:h-28 flex items-center justify-center shadow-md mt-2">
                             <span class="text-2xl font-black text-slate-300">2º</span>
                         </div>
                     </div>
@@ -720,12 +720,12 @@
             // 1º Lugar
             podiumHTML += `
                 <div class="flex flex-col items-center flex-1 order-2 -mt-4">
-                    <div class="text-4xl mb-1 text-yellow-400 animate-bounce" style="animation-duration: 1.8s;">
-                        <i class="fas fa-trophy drop-shadow-lg"></i>
+                    <div class="text-4xl mb-1 text-yellow-400">
+                        <i class="fas fa-trophy"></i>
                     </div>
                     <div class="text-sm sm:text-base font-extrabold text-amber-300 break-all px-1 text-center line-clamp-2">${first.name}</div>
                     <div class="text-xs sm:text-sm font-extrabold text-amber-400 mt-0.5">${first.count} ${first.count === 1 ? 'pedido' : 'pedidos'}</div>
-                    <div class="w-full bg-amber-600 border-t-4 border-yellow-300 rounded-t-lg h-32 sm:h-36 flex flex-col items-center justify-center shadow-2xl mt-2 relative overflow-hidden">
+                    <div class="w-full bg-amber-600 border-t-4 border-yellow-300 rounded-t-lg h-32 sm:h-36 flex flex-col items-center justify-center shadow-lg mt-2 relative overflow-hidden">
                         <span class="text-3xl sm:text-4xl font-black text-yellow-200">1º</span>
                         <span class="text-[10px] font-bold tracking-wider uppercase text-amber-100 bg-amber-700/60 px-2 py-0.5 rounded-full mt-1">Campeão</span>
                     </div>
@@ -736,12 +736,12 @@
             if (third) {
                 podiumHTML += `
                     <div class="flex flex-col items-center flex-1 order-3">
-                        <div class="text-2xl mb-1 text-amber-600 animate-bounce" style="animation-duration: 2.6s;">
-                            <i class="fas fa-trophy drop-shadow-md"></i>
+                        <div class="text-2xl mb-1 text-amber-600">
+                            <i class="fas fa-trophy"></i>
                         </div>
                         <div class="text-xs sm:text-sm font-bold text-amber-600 break-all px-1 text-center line-clamp-2">${third.name}</div>
                         <div class="text-xs font-extrabold text-amber-400 mt-0.5">${third.count} ${third.count === 1 ? 'pedido' : 'pedidos'}</div>
-                        <div class="w-full bg-amber-900/80 border-t-4 border-amber-600 rounded-t-lg h-16 sm:h-20 flex items-center justify-center shadow-lg mt-2">
+                        <div class="w-full bg-amber-900/80 border-t-4 border-amber-600 rounded-t-lg h-16 sm:h-20 flex items-center justify-center shadow-md mt-2">
                             <span class="text-xl font-black text-amber-500">3º</span>
                         </div>
                     </div>
